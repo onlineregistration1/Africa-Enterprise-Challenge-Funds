@@ -2,11 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Chat</title>
 
 <style>
-
 *{
 margin:0;
 padding:0;
@@ -24,22 +23,20 @@ flex-direction:column;
 .header{
 background:#075e54;
 color:white;
-padding:14px;
+padding:12px;
 display:flex;
 align-items:center;
 gap:10px;
 font-weight:bold;
-font-size:18px;
 }
 
 .back{
 background:white;
 color:#075e54;
 border:none;
-padding:8px 14px;
-border-radius:8px;
+padding:8px 12px;
+border-radius:6px;
 cursor:pointer;
-font-weight:bold;
 }
 
 .phone{
@@ -52,174 +49,146 @@ overflow-y:auto;
 padding:15px;
 display:flex;
 flex-direction:column;
+gap:10px;
 }
 
 .userMsg{
-
 background:#dcf8c6;
-padding:10px 14px;
+padding:10px;
 border-radius:12px;
-margin-bottom:12px;
 align-self:flex-start;
 max-width:80%;
-word-wrap:break-word;
-
 }
 
 .adminMsg{
-
 background:white;
-padding:10px 14px;
+padding:10px;
 border-radius:12px;
-margin-bottom:12px;
 align-self:flex-end;
 max-width:80%;
-word-wrap:break-word;
-
 }
 
 .bottom{
-
-background:white;
-padding:10px;
 display:flex;
+padding:10px;
 gap:8px;
-
+background:white;
 }
 
 .bottom input{
-
 flex:1;
 padding:12px;
-font-size:16px;
-border:1px solid #ccc;
 border-radius:25px;
-
+border:1px solid #ccc;
+font-size:16px;
 }
 
 .bottom button{
-
 background:#25d366;
 color:white;
 border:none;
 padding:12px 18px;
 border-radius:25px;
 cursor:pointer;
-
 }
-
 </style>
-
 </head>
 
 <body>
 
 <div class="header">
-
-<button
-class="back"
-onclick="history.back()">
-←
-</button>
-
-<div
-class="phone"
-id="phoneTitle">
-Loading...
+<button class="back" onclick="history.back()">←</button>
+<div class="phone" id="phoneTitle">Loading...</div>
 </div>
 
-</div>
-
-<div
-class="chatArea"
-id="chatArea">
-
-</div>
+<div class="chatArea" id="chatArea"></div>
 
 <div class="bottom">
-
-<input
-id="message"
-placeholder="Reply...">
-
-<button
-id="send">
-Send
-</button>
-
+<input id="message" placeholder="Type reply...">
+<button id="sendBtn">Send</button>
 </div>
 
 <script type="module">
 
 import { db } from "./firebase.js";
 
-import{
+import {
 collection,
 query,
 orderBy,
 onSnapshot,
 addDoc,
 serverTimestamp
-}
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-const params=new URLSearchParams(location.search);
+// GET USER PHONE
+const params = new URLSearchParams(location.search);
+const phone = params.get("user");
 
-const phone=params.get("user");
+document.getElementById("phoneTitle").innerText = phone;
 
-document.getElementById("phoneTitle").innerHTML=phone;
+// CHAT AREA
+const chatArea = document.getElementById("chatArea");
+const input = document.getElementById("message");
+const sendBtn = document.getElementById("sendBtn");
 
-const chatArea=document.getElementById("chatArea");
+// FIRESTORE PATH
+const messagesRef = collection(db,"chats",phone,"messages");
 
-const messagesRef=collection(db,"chats",phone,"messages");
+// SHOW MESSAGE
+function showMsg(text,sender){
 
-function bubble(text,isAdmin){
+const div = document.createElement("div");
 
-const div=document.createElement("div");
+div.className = sender==="admin" ? "adminMsg" : "userMsg";
 
-div.className=isAdmin?"adminMsg":"userMsg";
-
-div.innerHTML=text;
+div.textContent = text;
 
 chatArea.appendChild(div);
 
-chatArea.scrollTop=chatArea.scrollHeight;
-
+chatArea.scrollTop = chatArea.scrollHeight;
 }
 
-const q=query(messagesRef,orderBy("time"));
+// REAL TIME LISTENER
+const q = query(messagesRef, orderBy("time"));
 
 onSnapshot(q,(snap)=>{
-// ---------- Send Admin Message ----------
 
-const input = document.getElementById("message");
-const send = document.getElementById("send");
+chatArea.innerHTML="";
 
-send.onclick = async () => {
+snap.forEach(doc=>{
+
+const data = doc.data();
+
+showMsg(data.text,data.sender);
+
+});
+
+});
+
+// SEND MESSAGE (FIXED)
+sendBtn.addEventListener("click", async ()=>{
 
 const text = input.value.trim();
-
-if(text==="") return;
+if(!text) return;
 
 await addDoc(messagesRef,{
-sender:"admin",
 text:text,
-time:serverTimestamp(),
-unsent:false
+sender:"admin",
+time:serverTimestamp()
 });
 
 input.value="";
-
-};
-
-// Press Enter to Send
-
-input.addEventListener("keypress",async(e)=>{
-
-if(e.key==="Enter"){
-
-send.click();
-
-}
-
 });
+
+// ENTER KEY SUPPORT
+input.addEventListener("keypress",(e)=>{
+if(e.key==="Enter"){
+sendBtn.click();
+}
+});
+
+</script>
+
+</body>
+</html>
