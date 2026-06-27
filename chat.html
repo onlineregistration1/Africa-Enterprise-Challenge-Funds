@@ -6,6 +6,7 @@
 <title>Support Chat</title>
 
 <style>
+
 *{
 margin:0;
 padding:0;
@@ -21,21 +22,22 @@ flex-direction:column;
 }
 
 .header{
-background:#075e54;
+height:60px;
+background:#075E54;
 color:white;
-padding:15px;
 display:flex;
 justify-content:space-between;
 align-items:center;
+padding:0 15px;
 font-size:18px;
 font-weight:bold;
 }
 
 .logout{
-background:red;
+background:#d32f2f;
 color:white;
 border:none;
-padding:8px 14px;
+padding:8px 12px;
 border-radius:6px;
 cursor:pointer;
 }
@@ -44,35 +46,35 @@ cursor:pointer;
 flex:1;
 overflow-y:auto;
 padding:15px;
+display:flex;
+flex-direction:column;
+gap:10px;
 }
 
 .admin{
 background:white;
-padding:10px 14px;
+padding:10px;
 border-radius:12px;
-margin-bottom:12px;
 max-width:80%;
-width:fit-content;
+align-self:flex-start;
 }
 
 .user{
-background:#dcf8c6;
-padding:10px 14px;
+background:#DCF8C6;
+padding:10px;
 border-radius:12px;
-margin-left:auto;
-margin-bottom:12px;
 max-width:80%;
-width:fit-content;
+align-self:flex-end;
 }
 
 .bottom{
-padding:10px;
-background:white;
 display:flex;
+padding:10px;
 gap:8px;
+background:white;
 }
 
-.bottom input{
+#msg{
 flex:1;
 padding:12px;
 border-radius:25px;
@@ -80,25 +82,37 @@ border:1px solid #ccc;
 font-size:16px;
 }
 
-.bottom button{
-background:#25d366;
+#photo{
+display:none;
+}
+
+.photoBtn{
+background:#2196F3;
+color:white;
+padding:12px;
+border-radius:50%;
+cursor:pointer;
+}
+
+#sendBtn{
+background:#25D366;
 color:white;
 border:none;
-padding:12px 18px;
+padding:12px 20px;
 border-radius:25px;
-font-size:16px;
 cursor:pointer;
 }
 
 .whatsapp{
-display:block;
-text-align:center;
-background:#25d366;
+background:#25D366;
 color:white;
-text-decoration:none;
+text-align:center;
 padding:14px;
+text-decoration:none;
 font-weight:bold;
+display:block;
 }
+
 </style>
 
 </head>
@@ -115,7 +129,7 @@ Logout
 
 </div>
 
-<div class="chatArea" id="chatArea">
+<div id="chatArea" class="chatArea">
 
 <div class="admin">
 Welcome 👋<br>
@@ -125,6 +139,13 @@ How can we help you today?
 </div>
 
 <div class="bottom">
+
+<label class="photoBtn" for="photo">📷</label>
+
+<input
+type="file"
+id="photo"
+accept="image/*">
 
 <input
 id="msg"
@@ -136,52 +157,11 @@ Send
 
 </div>
 
-<a class="whatsapp"
+<a
+class="whatsapp"
 href="https://wa.me/254734081951?text=Hello!%20I'd%20like%20this%20Programme.">
 
 💬 Chat us via WhatsApp
-
-</a>
-
-<script>
-
-const phone=localStorage.getItem("loggedUser");
-
-if(!phone){
-location.href="index.html";
-}
-
-document.getElementById("logoutBtn").onclick=()=>{
-
-localStorage.removeItem("loggedUser");
-
-location.href="index.html";
-
-};
-
-const area=document.getElementById("chatArea");
-
-document.getElementById("sendBtn").onclick=()=>{
-
-const box=document.getElementById("msg");
-
-const text=box.value.trim();
-
-if(text=="") return;
-
-const div=document.createElement("div");
-
-div.className="user";
-
-div.innerText=text;
-
-area.appendChild(div);
-
-box.value="";
-
-area.scrollTop=area.scrollHeight;
-
-};
 
 <script type="module">
 
@@ -189,10 +169,10 @@ import { db } from "./firebase.js";
 
 import {
 collection,
-addDoc,
 query,
 orderBy,
 onSnapshot,
+addDoc,
 serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
@@ -202,17 +182,22 @@ if(!phone){
 location.href="index.html";
 }
 
-const chatArea=document.getElementById("chatArea");
-const msg=document.getElementById("msg");
-const sendBtn=document.getElementById("sendBtn");
+const chatArea = document.getElementById("chatArea");
+const msg = document.getElementById("msg");
+const sendBtn = document.getElementById("sendBtn");
 
-const messagesRef=collection(db,"chats",phone,"messages");
+document.getElementById("logoutBtn").onclick = () => {
+localStorage.removeItem("loggedUser");
+location.href="index.html";
+};
 
-function addBubble(text,me){
+const messagesRef = collection(db,"chats",phone,"messages");
+
+function showMessage(text,sender){
 
 const div=document.createElement("div");
 
-div.className=me?"user":"admin";
+div.className = sender==="user" ? "user" : "admin";
 
 div.textContent=text;
 
@@ -228,41 +213,43 @@ onSnapshot(q,(snapshot)=>{
 
 chatArea.innerHTML="";
 
-snapshot.forEach((doc)=>{
+snapshot.forEach((d)=>{
 
-const data=doc.data();
+const data=d.data();
 
-addBubble(data.text,data.sender==="user");
-
-});
+showMessage(data.text,data.sender);
 
 });
 
-// ---------- Send Message ----------
+});
 
-sendBtn.onclick = async () => {
+sendBtn.onclick = async ()=>{
 
-const text = msg.value.trim();
+const text=msg.value.trim();
 
 if(text==="") return;
 
 await addDoc(messagesRef,{
 sender:"user",
 text:text,
-time:serverTimestamp(),
-unsent:false
+time:serverTimestamp()
 });
 
 msg.value="";
 
 };
 
-// ---------- Logout ----------
+msg.addEventListener("keypress",(e)=>{
 
-document.getElementById("logoutBtn").onclick=()=>{
+if(e.key==="Enter"){
 
-localStorage.removeItem("loggedUser");
+sendBtn.click();
 
-location.href="index.html";
+}
 
-};
+});
+
+</script>
+
+</body>
+</html></a>
