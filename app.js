@@ -52,3 +52,86 @@ const saved=localStorage.getItem("loggedUser");
 if(saved){
 location.href="chat.html";
 }
+// ---------- Create Account ----------
+document.getElementById("createAccount").onclick = async () => {
+
+const phone = document.getElementById("signupPhone").value.trim();
+const password = document.getElementById("signupPassword").value;
+const confirm = document.getElementById("confirmPassword").value;
+
+message.style.color = "red";
+
+if(phone==="" || password==="" || confirm===""){
+message.innerHTML="Fill in all fields.";
+return;
+}
+
+if(password!==confirm){
+message.innerHTML="Passwords do not match.";
+return;
+}
+
+const userRef = doc(db,"users",phone);
+const userSnap = await getDoc(userRef);
+
+if(userSnap.exists()){
+message.innerHTML="Account already exists. Please Login.";
+return;
+}
+
+await setDoc(userRef,{
+phone:phone,
+password:password,
+createdAt:Date.now(),
+lastSeen:Date.now()
+});
+
+localStorage.setItem("loggedUser",phone);
+
+message.style.color="green";
+message.innerHTML="Account created successfully...";
+
+setTimeout(()=>{
+location.href="chat.html";
+},800);
+
+};
+
+// ---------- Login ----------
+document.getElementById("loginNow").onclick = async ()=>{
+
+const phone=document.getElementById("loginPhone").value.trim();
+const password=document.getElementById("loginPassword").value;
+
+message.style.color="red";
+
+if(phone==="" || password===""){
+message.innerHTML="Enter phone number and password.";
+return;
+}
+
+const userRef=doc(db,"users",phone);
+const userSnap=await getDoc(userRef);
+
+if(!userSnap.exists()){
+message.innerHTML="Account not found. Please create an account.";
+return;
+}
+
+const user=userSnap.data();
+
+if(user.password!==password){
+message.innerHTML="Incorrect password.";
+return;
+}
+
+localStorage.setItem("loggedUser",phone);
+
+message.style.color="green";
+message.innerHTML="Login successful...";
+
+setTimeout(()=>{
+location.href="chat.html";
+},800);
+
+};
