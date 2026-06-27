@@ -183,7 +183,86 @@ area.scrollTop=area.scrollHeight;
 
 };
 
-</script>
+<script type="module">
 
-</body>
-</html>
+import { db } from "./firebase.js";
+
+import {
+collection,
+addDoc,
+query,
+orderBy,
+onSnapshot,
+serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+const phone = localStorage.getItem("loggedUser");
+
+if(!phone){
+location.href="index.html";
+}
+
+const chatArea=document.getElementById("chatArea");
+const msg=document.getElementById("msg");
+const sendBtn=document.getElementById("sendBtn");
+
+const messagesRef=collection(db,"chats",phone,"messages");
+
+function addBubble(text,me){
+
+const div=document.createElement("div");
+
+div.className=me?"user":"admin";
+
+div.textContent=text;
+
+chatArea.appendChild(div);
+
+chatArea.scrollTop=chatArea.scrollHeight;
+
+}
+
+const q=query(messagesRef,orderBy("time"));
+
+onSnapshot(q,(snapshot)=>{
+
+chatArea.innerHTML="";
+
+snapshot.forEach((doc)=>{
+
+const data=doc.data();
+
+addBubble(data.text,data.sender==="user");
+
+});
+
+});
+
+// ---------- Send Message ----------
+
+sendBtn.onclick = async () => {
+
+const text = msg.value.trim();
+
+if(text==="") return;
+
+await addDoc(messagesRef,{
+sender:"user",
+text:text,
+time:serverTimestamp(),
+unsent:false
+});
+
+msg.value="";
+
+};
+
+// ---------- Logout ----------
+
+document.getElementById("logoutBtn").onclick=()=>{
+
+localStorage.removeItem("loggedUser");
+
+location.href="index.html";
+
+};
