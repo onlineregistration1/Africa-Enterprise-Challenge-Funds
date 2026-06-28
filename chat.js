@@ -1,3 +1,4 @@
+
 import { auth, db } from "./firebase.js";
 
 import {
@@ -6,7 +7,6 @@ signOut
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 import {
-doc,
 collection,
 addDoc,
 query,
@@ -15,16 +15,14 @@ onSnapshot,
 serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-const messagesBox=document.getElementById("messages");
-const input=document.getElementById("messageInput");
-const sendBtn=document.getElementById("sendBtn");
-const logoutBtn=document.getElementById("logoutBtn");
+const messages=document.getElementById("messages");
+const input=document.getElementById("msgInput");
+const sendBtn=document.getElementById("send");
+const logoutBtn=document.getElementById("logout");
 
-let currentUser=null;
+let currentUser;
 
-/* =========================
-   AUTH CHECK
-========================= */
+/* AUTH */
 
 onAuthStateChanged(auth,(user)=>{
 
@@ -39,22 +37,18 @@ loadMessages();
 
 });
 
-/* =========================
-   LOGOUT
-========================= */
+/* LOGOUT */
 
-logoutBtn.addEventListener("click",async()=>{
+logoutBtn.onclick=async()=>{
 
 await signOut(auth);
 window.location="index.html";
 
-});
+};
 
-/* =========================
-   SEND MESSAGE
-========================= */
+/* SEND MESSAGE */
 
-sendBtn.addEventListener("click",async()=>{
+sendBtn.onclick=async()=>{
 
 const text=input.value.trim();
 if(!text) return;
@@ -62,17 +56,16 @@ if(!text) return;
 await addDoc(collection(db,"chats",currentUser.uid,"messages"),{
 sender:"user",
 text:text,
-unsent:false,
-time:serverTimestamp()
+time:serverTimestamp(),
+unsentByUser:false,
+unsentByAdmin:false
 });
 
 input.value="";
 
-});
+};
 
-/* =========================
-   LOAD MESSAGES (REALTIME)
-========================= */
+/* LOAD MESSAGES */
 
 function loadMessages(){
 
@@ -81,35 +74,36 @@ collection(db,"chats",currentUser.uid,"messages"),
 orderBy("time","asc")
 );
 
-onSnapshot(q,(snapshot)=>{
+onSnapshot(q,(snap)=>{
 
-messagesBox.innerHTML="";
+messages.innerHTML="";
 
-snapshot.forEach((docSnap)=>{
+snap.forEach(docSnap=>{
 
-const data=docSnap.data();
+const d=docSnap.data();
 
 const div=document.createElement("div");
+
 div.classList.add("msg");
 
-if(data.sender==="user"){
+if(d.sender==="user"){
 div.classList.add("me");
 }else{
 div.classList.add("other");
 }
 
-if(data.unsent){
+if(d.unsentByUser){
 div.innerHTML="<i>Message unsent</i>";
 }else{
-div.textContent=data.text;
+div.textContent=String(d.text||"");
 }
 
-messagesBox.appendChild(div);
+messages.appendChild(div);
 
 });
 
-/* auto scroll like WhatsApp */
-messagesBox.scrollTop=messagesBox.scrollHeight;
+/* scroll like WhatsApp */
+messages.scrollTop=messages.scrollHeight;
 
 });
 
