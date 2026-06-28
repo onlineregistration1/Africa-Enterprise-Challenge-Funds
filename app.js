@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, orderBy, onSnapshot, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDh2fHMUbysckAxdIA8dcz8sHWrcLbW1EQ",
@@ -14,6 +15,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 const $ = id=>document.getElementById(id);
 let phone = localStorage.getItem('phone');
@@ -31,7 +33,7 @@ $('authBtn').onclick = async ()=>{
   const pw = $('pwd').value;
   const rep = $('repPwd').value;
   $('authMsg').textContent='';
-  if(!ph || !pw) return $('authMsg').textContent='Fill all fields';
+  if(!ph ||!pw) return $('authMsg').textContent='Fill all fields';
   const email = ph+'@aef.chat';
 
   const uRef = doc(db,'users',ph);
@@ -57,6 +59,7 @@ function enterChat(ph){
   $('chatScreen').classList.remove('hidden');
   $('chatHead').textContent = ph;
   listen(ph);
+  setTimeout(()=>$('msgInput').focus(),300); // Auto open keyboard
 }
 
 function listen(ph){
@@ -66,26 +69,46 @@ function listen(ph){
     const box=$('chatBox'); box.innerHTML='';
     snap.forEach(d=>{
       const m=d.data();
-      if(m.delUser) return; // user cannot see deleted
+      if(m.delUser) return;
       const div=document.createElement('div');
       div.className='msg '+(m.sender==='user'?'sent':'recv');
-      div.textContent=m.text;
-      box.appendChild(div); // NO double-click unsend for user
+      if(m.img){
+        const img=document.createElement('img');
+        img.src=m.img;
+        div.appendChild(img);
+      }else{
+        div.textContent=m.text;
+      }
+      box.appendChild(div);
     });
   });
+}
+
+async function sendMsg(text='',imgUrl=''){
+  await addDoc(collection(db,'chats',phone,'messages'),{
+    text, img:imgUrl||'', sender:'user', ts:serverTimestamp(), delUser:false, delAdmin:false
+  });
+  await updateDoc(doc(db,'users',phone),{lastSeen:serverTimestamp(),lastSender:'user'});
 }
 
 $('sendBtn').onclick = async ()=>{
   const txt=$('msgInput').value.trim();
   if(!txt) return;
-  await addDoc(collection(db,'chats',phone,'messages'),{
-    text:txt, sender:'user', ts:serverTimestamp(), delUser:false, delAdmin:false
-  });
-  await updateDoc(doc(db,'users',phone),{lastSeen:serverTimestamp(),lastSender:'user'});
+  await sendMsg(txt,'');
   $('msgInput').value=''; $('previewBar').classList.remove('show');
 }
 
-$('msgInput').oninput=()=>{ 
+$('imgInput').onchange = async (e)=>{
+  const file=e.target.files[0];
+  if(!file) return;
+  const storageRef=ref(storage,`chats/${phone}/${Date.now()}_${file.name}`);
+  const snap=await uploadBytes(storageRef,file);
+  const url=await getDownloadURL(snap.ref);
+  await sendMsg('',url);
+  e.target.value='';
+}
+
+$('msgInput').oninput=()=>{
   const p=$('previewBar');
   if($('msgInput').value){p.textContent=$('msgInput').value;p.classList.add('show');}
   else p.classList.remove('show');
@@ -95,4 +118,4 @@ $('logoutBtn').onclick=async()=>{
   await signOut(auth);
   localStorage.clear();
   location.reload();
-    }
+}
