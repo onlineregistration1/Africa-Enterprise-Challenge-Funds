@@ -24,7 +24,8 @@ header{flex:0 0 auto;display:flex;align-items:center;justify-content:space-betwe
 .row{display:flex;gap:6px;align-items:center;}
 .row input{flex:1;}
 .attachBtn{background:#2a3942;color:var(--txt);padding:12px 14px;border-radius:8px;font-size:20px;font-weight:700;cursor:pointer;user-select:none;}
-.waBtn{flex:0 0 auto;display:block;text-align:center;background:#25D366;color:#fff;text-decoration:none;padding:10px;border-radius:8px;margin:6px 0;}
+.waBtn{display:block;text-align:center;background:#25D366;color:#fff;text-decoration:none;border-radius:6px;margin-top:6px;}
+.waBtn.small{font-size:13px;padding:6px 8px;}
 #userList{display:flex;flex-direction:column;gap:6px;overflow-y:auto;min-height:0;}
 .userRow{padding:12px;background:#2a3942;border-radius:8px;display:flex;justify-content:space-between;align-items:center;}
 .userRow.unread{color:var(--green);font-weight:700;}
