@@ -14,14 +14,16 @@ button.small{padding:6px 10px;font-size:13px;}
 header{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid #2a3942;}
 #chatBox{flex:1 1 auto;overflow-y:auto;display:flex;flex-direction:column-reverse;gap:6px;padding:8px 4px;min-height:0;}
 .msg{max-width:78%;padding:8px 12px;border-radius:12px;line-height:1.35;word-wrap:break-word;position:relative;user-select:none;}
+.msg img{max-width:100%;border-radius:8px;margin-top:4px;}
 .sent{background:var(--sent);align-self:flex-end;border-bottom-right-radius:2px;}
 .recv{background:var(--recv);align-self:flex-start;border-bottom-left-radius:2px;}
 .deleted{opacity:.6;font-style:italic;}
 #inputWrap{flex:0 0 auto;margin-top:auto;}
-#previewBar{min-height:40px;background:#2a3942;border-radius:8px;padding:6px 10px;margin-bottom:6px;display:none;}
+#previewBar{min-height:80px;max-height:120px;overflow:auto;background:#2a3942;border-radius:8px;padding:8px 10px;margin-bottom:6px;display:none;white-space:pre-wrap;}
 #previewBar.show{display:block;}
-.row{display:flex;gap:6px;}
+.row{display:flex;gap:6px;align-items:center;}
 .row input{flex:1;}
+.attachBtn{background:#2a3942;color:var(--txt);padding:12px 14px;border-radius:8px;font-size:20px;font-weight:700;cursor:pointer;user-select:none;}
 .waBtn{flex:0 0 auto;display:block;text-align:center;background:#25D366;color:#fff;text-decoration:none;padding:10px;border-radius:8px;margin:6px 0;}
 #userList{display:flex;flex-direction:column;gap:6px;overflow-y:auto;min-height:0;}
 .userRow{padding:12px;background:#2a3942;border-radius:8px;display:flex;justify-content:space-between;align-items:center;}
