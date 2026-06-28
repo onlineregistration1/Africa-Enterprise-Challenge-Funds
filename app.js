@@ -70,8 +70,7 @@ function listen(ph){
       const div=document.createElement('div');
       div.className='msg '+(m.sender==='user'?'sent':'recv');
       div.textContent=m.text;
-      div.ondblclick=()=>unsend(d.id,ph);
-      box.appendChild(div);
+      box.appendChild(div); // NO double-click unsend for user
     });
   });
 }
@@ -92,12 +91,8 @@ $('msgInput').oninput=()=>{
   else p.classList.remove('show');
 }
 
-async function unsend(id,ph){
-  await updateDoc(doc(db,'chats',ph,'messages',id),{delUser:true});
-}
-
 $('logoutBtn').onclick=async()=>{
   await signOut(auth);
   localStorage.clear();
   location.reload();
-}
+    }
