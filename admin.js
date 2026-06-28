@@ -41,7 +41,7 @@ async function loadUsers(){
   const snap=await getDocs(collection(db,'users'));
   const users=[];
   snap.forEach(d=>users.push({id:d.id,...d.data()}));
-  users.sort((a,b)=>(b.lastSeen?.seconds||0)-(a.lastSeen?.seconds||0)); // newest first
+  users.sort((a,b)=>(b.lastSeen?.seconds||0)-(a.lastSeen?.seconds||0));
 
   $('userList').innerHTML='';
   users.forEach(u=>{
@@ -56,7 +56,7 @@ async function loadUsers(){
 
 function openChat(phone,row){
   activePhone=phone;
-  row.classList.remove('unread'); // mark read
+  row.classList.remove('unread');
   $('userList').classList.add('hidden');
   $('chatBox').classList.remove('hidden');
   $('inputWrap').classList.remove('hidden');
@@ -82,12 +82,12 @@ function listen(phone){
     $('chatBox').innerHTML='';
     snap.forEach(d=>{
       const m=d.data();
-      if(m.delAdmin) return; // admin deleted = blank
+      if(m.delAdmin) return; // admin deleted = blank for both
       const div=document.createElement('div');
       div.className='msg '+(m.sender==='admin'?'sent':'recv');
-      if(m.delUser) div.classList.add('deleted'), div.textContent='Deleted message';
+      if(m.delUser) div.classList.add('deleted'), div.textContent='Deleted message'; // admin sees "Deleted"
       else div.textContent=m.text;
-      div.ondblclick=()=>unsend(d.id,phone);
+      div.ondblclick=()=>unsend(d.id,phone); // ONLY admin can unsend
       $('chatBox').appendChild(div);
     });
   });
@@ -120,4 +120,4 @@ async function delUser(phone){
   msgs.forEach(d=>batch.delete(d.ref));
   await batch.commit();
   closeChat(); loadUsers();
-}
+      }
