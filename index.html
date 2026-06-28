@@ -29,22 +29,21 @@
   <div id="chatScreen" class="screen hidden">
     <header>
       <span id="chatHead">Chat</span>
-      <button id="logoutBtn" class="red small">Logout</button>
+      <div class="headBtns">
+        <a class="waBtn small" href="https://wa.me/254734081951?text=Hello!%20I'd%20like%20this%20Programme." target="_blank">WhatsApp</a>
+        <button id="logoutBtn" class="red small">Logout</button>
+      </div>
     </header>
 
     <div id="chatBox"></div>
 
     <div id="inputWrap">
-      <div id="previewBar"></div>
       <div class="row">
         <label class="attachBtn">+
           <input type="file" id="imgInput" accept="image/*" hidden>
         </label>
-        <input type="text" id="msgInput" placeholder="Type a message" autocomplete="off">
-        <button id="sendBtn">Send</button>
-      </div>
-      <div class="waRow">
-        <a class="waBtn small" href="https://wa.me/254734081951?text=Hello!%20I'd%20like%20this%20Programme." target="_blank">Chat us via WhatsApp</a>
+        <input type="text" id="msgInput" placeholder="Message" autocomplete="off" inputmode="text">
+        <button id="sendBtn" type="button">Send</button>
       </div>
     </div>
   </div>
