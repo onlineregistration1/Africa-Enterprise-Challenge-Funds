@@ -59,7 +59,7 @@ function enterChat(ph){
   $('chatScreen').classList.remove('hidden');
   $('chatHead').textContent = ph;
   listen(ph);
-  setTimeout(()=>$('msgInput').focus(),300); // Auto open keyboard
+  setTimeout(()=>$('msgInput').focus(),300);
 }
 
 function listen(ph){
@@ -96,7 +96,7 @@ $('sendBtn').onclick = async ()=>{
   if(!txt) return;
   await sendMsg(txt,'');
   $('msgInput').value=''; $('previewBar').classList.remove('show');
-  setTimeout(()=>$('msgInput').focus(),0); // Keep keyboard open
+  setTimeout(()=>$('msgInput').focus(),0);
 }
 
 $('imgInput').onchange = async (e)=>{
@@ -107,7 +107,7 @@ $('imgInput').onchange = async (e)=>{
   const url=await getDownloadURL(snap.ref);
   await sendMsg('',url);
   e.target.value='';
-  setTimeout(()=>$('msgInput').focus(),0); // Keep keyboard open
+  setTimeout(()=>$('msgInput').focus(),0);
 }
 
 $('msgInput').oninput=()=>{
