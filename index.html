@@ -2,12 +2,123 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
 <title>Africa Enterprise Challenge Funds</title>
 
 <link rel="stylesheet" href="style.css">
 
-<script type="module" src="app.js" defer></script>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+background:#ece5dd;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+padding:15px;
+}
+
+.container{
+width:100%;
+max-width:420px;
+background:#fff;
+border-radius:12px;
+overflow:hidden;
+box-shadow:0 5px 18px rgba(0,0,0,.2);
+}
+
+.header{
+background:#075E54;
+color:#fff;
+text-align:center;
+padding:18px;
+font-size:22px;
+font-weight:bold;
+}
+
+.formBox{
+padding:20px;
+}
+
+input{
+width:100%;
+padding:14px;
+margin-top:14px;
+border:1px solid #ccc;
+border-radius:8px;
+font-size:16px;
+outline:none;
+}
+
+input:focus{
+border-color:#25D366;
+}
+
+.passwordBox{
+position:relative;
+}
+
+.passwordBox input{
+padding-right:50px;
+}
+
+.eye{
+position:absolute;
+right:15px;
+top:28px;
+cursor:pointer;
+font-size:18px;
+user-select:none;
+}
+
+button{
+width:100%;
+padding:14px;
+margin-top:18px;
+border:none;
+border-radius:8px;
+background:#25D366;
+color:white;
+font-size:18px;
+cursor:pointer;
+font-weight:bold;
+}
+
+button:hover{
+background:#1fa855;
+}
+
+.switch{
+margin-top:18px;
+text-align:center;
+font-size:15px;
+}
+
+.switch span{
+color:#075E54;
+font-weight:bold;
+cursor:pointer;
+}
+
+#error{
+margin-top:15px;
+color:red;
+text-align:center;
+font-size:15px;
+display:none;
+}
+
+#signupArea{
+display:none;
+}
+</style>
 
 </head>
 
@@ -15,26 +126,15 @@
 
 <div class="container">
 
-<div class="logo">
-<h2>Africa Enterprise Challenge Funds</h2>
-<p>Secure Support Chat</p>
+<div class="header">
+Africa Enterprise Challenge Funds
 </div>
 
-<div id="homePage">
+<div class="formBox">
 
-<button id="loginBtn" class="mainBtn">
-Login
-</button>
+<div id="loginArea">
 
-<button id="signupBtn" class="mainBtn">
-Create Account
-</button>
-
-</div>
-
-<div id="loginPage" style="display:none;">
-
-<h3>Login</h3>
+<h2 style="text-align:center;">Login</h2>
 
 <input
 type="tel"
@@ -48,31 +148,33 @@ type="password"
 id="loginPassword"
 placeholder="Password">
 
-<button
-type="button"
-id="showLoginPassword">
-👁
-</button>
+<span
+class="eye"
+onclick="togglePassword('loginPassword',this)">👁</span>
 
 </div>
 
-<button
-id="loginNow"
-class="greenBtn">
-Login
+<button id="loginBtn">
+LOGIN
 </button>
 
-<button
-id="backHome1"
-class="greyBtn">
-Back
-</button>
+<div class="switch">
+
+Don't have an account?
+
+<span onclick="showSignup()">
+
+Create Account
+
+</span>
 
 </div>
 
-<div id="signupPage" style="display:none;">
+</div>
 
-<h3>Create Account</h3>
+<div id="signupArea">
+
+<h2 style="text-align:center;">Create Account</h2>
 
 <input
 type="tel"
@@ -84,13 +186,11 @@ placeholder="Phone Number">
 <input
 type="password"
 id="signupPassword"
-placeholder="Password">
+placeholder="Create Password">
 
-<button
-type="button"
-id="showSignupPassword">
-👁
-</button>
+<span
+class="eye"
+onclick="togglePassword('signupPassword',this)">👁</span>
 
 </div>
 
@@ -101,31 +201,72 @@ type="password"
 id="confirmPassword"
 placeholder="Confirm Password">
 
-<button
-type="button"
-id="showConfirmPassword">
-👁
-</button>
+<span
+class="eye"
+onclick="togglePassword('confirmPassword',this)">👁</span>
 
 </div>
 
-<button
-id="createAccount"
-class="greenBtn">
-Create Account
+<button id="signupBtn">
+
+CREATE ACCOUNT
+
 </button>
 
-<button
-id="backHome2"
-class="greyBtn">
-Back
-</button>
+<div class="switch">
+
+Already have an account?
+
+<span onclick="showLogin()">
+
+Login
+
+</span>
 
 </div>
 
-<div id="message"></div>
+</div>
+
+<div id="error"></div>
 
 </div>
+
+</div>
+
+<script type="module" src="script.js"></script>
+
+<script>
+  function showSignup(){
+document.getElementById("loginArea").style.display="none";
+document.getElementById("signupArea").style.display="block";
+document.getElementById("error").style.display="none";
+}
+
+function showLogin(){
+document.getElementById("signupArea").style.display="none";
+document.getElementById("loginArea").style.display="block";
+document.getElementById("error").style.display="none";
+}
+
+function togglePassword(id,eye){
+
+let input=document.getElementById(id);
+
+if(input.type==="password"){
+input.type="text";
+eye.innerHTML="🙈";
+}else{
+input.type="password";
+eye.innerHTML="👁";
+}
+
+}
+
+window.showSignup=showSignup;
+window.showLogin=showLogin;
+window.togglePassword=togglePassword;
+
+</script>
 
 </body>
 </html>
