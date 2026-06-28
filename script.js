@@ -8,51 +8,36 @@ signInWithEmailAndPassword
 import {
 doc,
 setDoc,
-getDoc,
 serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-const loginBtn=document.getElementById("loginBtn");
-const signupBtn=document.getElementById("signupBtn");
-const messageBox=document.getElementById("messageBox");
-
-function showMessage(msg,color="red"){
-messageBox.style.color=color;
-messageBox.innerText=msg;
-}
+const msg=document.getElementById("msg");
 
 function phoneToEmail(phone){
 return phone.trim()+"@aecf.local";
 }
 
-/* =========================
-   SIGN UP
-========================= */
+/* ================= SIGN UP ================= */
 
-signupBtn.addEventListener("click",async()=>{
+document.getElementById("signupBtn").onclick=async()=>{
 
 const phone=document.getElementById("signupPhone").value.trim();
-const pass=document.getElementById("signupPassword").value;
-const confirm=document.getElementById("confirmPassword").value;
+const pass=document.getElementById("signupPass").value;
+const confirm=document.getElementById("signupConfirm").value;
 
 if(!phone||!pass||!confirm){
-showMessage("Fill all fields");
+msg.innerText="Fill all fields";
 return;
 }
 
 if(pass!==confirm){
-showMessage("Passwords do not match");
+msg.innerText="Passwords do not match";
 return;
 }
-
-if(pass.length<6){
-showMessage("Password too short");
-return;
-}
-
-const email=phoneToEmail(phone);
 
 try{
+
+const email=phoneToEmail(phone);
 
 const userCred=await createUserWithEmailAndPassword(auth,email,pass);
 
@@ -61,50 +46,36 @@ phone:phone,
 createdAt:serverTimestamp()
 });
 
-showMessage("Account created", "green");
-
-setTimeout(()=>{
-
 window.location="chat.html";
 
-},1000);
-
 }catch(e){
-showMessage(e.message);
+msg.innerText="Signup error";
 }
 
-});
+};
 
-/* =========================
-   LOGIN
-========================= */
+/* ================= LOGIN ================= */
 
-loginBtn.addEventListener("click",async()=>{
+document.getElementById("loginBtn").onclick=async()=>{
 
 const phone=document.getElementById("loginPhone").value.trim();
-const pass=document.getElementById("loginPassword").value;
+const pass=document.getElementById("loginPass").value;
 
 if(!phone||!pass){
-showMessage("Enter phone and password");
+msg.innerText="Enter login details";
 return;
 }
 
-const email=phoneToEmail(phone);
-
 try{
+
+const email=phoneToEmail(phone);
 
 await signInWithEmailAndPassword(auth,email,pass);
 
-showMessage("Login successful","green");
-
-setTimeout(()=>{
-
 window.location="chat.html";
 
-},800);
-
 }catch(e){
-showMessage("Invalid login details");
+msg.innerText="Invalid login";
 }
 
-});
+};
