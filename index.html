@@ -39,7 +39,10 @@
     <div id="inputWrap">
       <div id="previewBar"></div>
       <div class="row">
-        <input type="text" id="msgInput" placeholder="Type a message">
+        <label class="attachBtn">+
+          <input type="file" id="imgInput" accept="image/*" hidden>
+        </label>
+        <input type="text" id="msgInput" placeholder="Type a message" autocomplete="off">
         <button id="sendBtn">Send</button>
       </div>
     </div>
