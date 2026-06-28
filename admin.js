@@ -1,133 +1,123 @@
-import { auth, db } from "./firebase.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc, getDocs, collection, addDoc, query, orderBy, onSnapshot, updateDoc, deleteDoc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import {
-signInWithEmailAndPassword,
-signOut,
-onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-
-import {
-collection,
-query,
-onSnapshot,
-addDoc,
-orderBy,
-serverTimestamp,
-setDoc,
-doc
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyDh2fHMUbysckAxdIA8dcz8sHWrcLbW1EQ",
+  authDomain: "african-enterprise-challenge-f.firebaseapp.com",
+  projectId: "african-enterprise-challenge-f",
+  storageBucket: "african-enterprise-challenge-f.firebasestorage.app",
+  messagingSenderId: "85146331644",
+  appId: "1:85146331644:web:b28599e0c8b75498fe6a79",
+  measurementId: "G-6C670QY54S"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 const ADMIN_USER="Kibet Davis";
 const ADMIN_PASS="Kwenik254$";
+const $=id=>document.getElementById(id);
 
-const usersDiv=document.getElementById("users");
-const loginBox=document.getElementById("loginAdmin");
-const panel=document.getElementById("panel");
+let activePhone=null; let unsub=null;
 
-const adminMessages=document.getElementById("adminMessages");
-const adminMsg=document.getElementById("adminMsg");
+if(localStorage.getItem('admin')==='1'){ showAdmin(); }
 
-let currentChat=null;
-
-/* LOGIN */
-
-document.getElementById("adminLoginBtn").onclick=async()=>{
-
-const u=document.getElementById("adminUser").value;
-const p=document.getElementById("adminPass").value;
-
-if(u!==ADMIN_USER || p!==ADMIN_PASS){
-alert("Wrong admin login");
-return;
+$('aLogin').onclick=()=>{
+  if($('aUser').value===ADMIN_USER && $('aPass').value===ADMIN_PASS){
+    localStorage.setItem('admin','1'); showAdmin();
+  }else $('aMsg').textContent='Wrong credentials';
 }
 
-loginBox.style.display="none";
-panel.style.display="block";
+$('aLogout').onclick=()=>{localStorage.removeItem('admin');location.reload();}
+$('backBtn').onclick=()=>{closeChat();}
 
-loadUsers();
-
-};
-
-/* LOAD USERS */
-
-function loadUsers(){
-
-const q=query(collection(db,"users"));
-
-onSnapshot(q,(snap)=>{
-
-usersDiv.innerHTML="";
-
-snap.forEach(u=>{
-
-const div=document.createElement("div");
-
-div.className="user";
-
-div.innerHTML=u.data().phone;
-
-div.onclick=()=>openChat(u.id,u.data().phone);
-
-usersDiv.appendChild(div);
-
-});
-
-});
-
+function showAdmin(){
+  $('loginScreen').classList.add('hidden');
+  $('adminScreen').classList.remove('hidden');
+  loadUsers();
 }
 
-/* OPEN CHAT */
+async function loadUsers(){
+  $('userList').innerHTML='Loading...';
+  const snap=await getDocs(collection(db,'users'));
+  const users=[];
+  snap.forEach(d=>users.push({id:d.id,...d.data()}));
+  users.sort((a,b)=>(b.lastSeen?.seconds||0)-(a.lastSeen?.seconds||0)); // newest first
 
-function openChat(uid,phone){
-
-currentChat=uid;
-
-const q=query(
-collection(db,"chats",uid,"messages"),
-orderBy("time","asc")
-);
-
-onSnapshot(q,(snap)=>{
-
-adminMessages.innerHTML="";
-
-snap.forEach(d=>{
-
-const data=d.data();
-
-const div=document.createElement("div");
-
-div.classList.add("msg");
-
-div.classList.add(data.sender==="user"?"me":"other");
-
-div.textContent=String(data.text||"");
-
-adminMessages.appendChild(div);
-
-});
-
-adminMessages.scrollTop=adminMessages.scrollHeight;
-
-});
-
+  $('userList').innerHTML='';
+  users.forEach(u=>{
+    const row=document.createElement('div');
+    row.className='userRow'+(u.lastSender==='user'?' unread':'');
+    row.innerHTML=`<span>${u.id}</span><span class="time">${u.lastSeen?new Date(u.lastSeen.seconds*1000).toLocaleTimeString():''}</span>`;
+    row.onclick=()=>openChat(u.id,row);
+    row.oncontextmenu=e=>{e.preventDefault(); if(confirm('Delete '+u.id+' and all chats?')) delUser(u.id);};
+    $('userList').appendChild(row);
+  });
 }
 
-/* SEND ADMIN MESSAGE */
+function openChat(phone,row){
+  activePhone=phone;
+  row.classList.remove('unread'); // mark read
+  $('userList').classList.add('hidden');
+  $('chatBox').classList.remove('hidden');
+  $('inputWrap').classList.remove('hidden');
+  $('backBtn').classList.remove('hidden');
+  $('aHead').textContent='Chat: '+phone;
+  listen(phone);
+}
 
-document.getElementById("adminSend").onclick=async()=>{
+function closeChat(){
+  if(unsub) unsub();
+  $('userList').classList.remove('hidden');
+  $('chatBox').classList.add('hidden');
+  $('inputWrap').classList.add('hidden');
+  $('backBtn').classList.add('hidden');
+  $('aHead').textContent='Admin';
+  activePhone=null;
+}
 
-if(!currentChat) return;
+function listen(phone){
+  if(unsub) unsub();
+  const q=query(collection(db,'chats',phone,'messages'), orderBy('ts','desc'));
+  unsub=onSnapshot(q,snap=>{
+    $('chatBox').innerHTML='';
+    snap.forEach(d=>{
+      const m=d.data();
+      if(m.delAdmin) return; // admin deleted = blank
+      const div=document.createElement('div');
+      div.className='msg '+(m.sender==='admin'?'sent':'recv');
+      if(m.delUser) div.classList.add('deleted'), div.textContent='Deleted message';
+      else div.textContent=m.text;
+      div.ondblclick=()=>unsend(d.id,phone);
+      $('chatBox').appendChild(div);
+    });
+  });
+}
 
-const text=adminMsg.value.trim();
-if(!text) return;
+$('sendBtn').onclick=async()=>{
+  const txt=$('msgInput').value.trim();
+  if(!txt||!activePhone) return;
+  await addDoc(collection(db,'chats',activePhone,'messages'),{
+    text:txt,sender:'admin',ts:serverTimestamp(),delUser:false,delAdmin:false
+  });
+  await updateDoc(doc(db,'users',activePhone),{lastSeen:serverTimestamp(),lastSender:'admin'});
+  $('msgInput').value='';$('previewBar').classList.remove('show');
+}
 
-await addDoc(collection(db,"chats",currentChat,"messages"),{
-sender:"admin",
-text:text,
-time:serverTimestamp()
-});
+$('msgInput').oninput=()=>{ 
+  const p=$('previewBar');
+  if($('msgInput').value){p.textContent=$('msgInput').value;p.classList.add('show');}
+  else p.classList.remove('show');
+}
 
-adminMsg.value="";
+async function unsend(id,phone){
+  await updateDoc(doc(db,'chats',phone,'messages',id),{delUser:true,delAdmin:true}); // blank both
+}
 
-};
+async function delUser(phone){
+  const batch=writeBatch(db);
+  batch.delete(doc(db,'users',phone));
+  const msgs=await getDocs(collection(db,'chats',phone,'messages'));
+  msgs.forEach(d=>batch.delete(d.ref));
+  await batch.commit();
+  closeChat(); loadUsers();
+}
