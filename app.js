@@ -95,8 +95,8 @@ $('sendBtn').onclick = async ()=>{
   const txt=$('msgInput').value.trim();
   if(!txt) return;
   await sendMsg(txt,'');
-  $('msgInput').value=''; $('previewBar').classList.remove('show');
-  setTimeout(()=>$('msgInput').focus(),0);
+  $('msgInput').value='';
+  $('msgInput').focus();
 }
 
 $('imgInput').onchange = async (e)=>{
@@ -107,17 +107,11 @@ $('imgInput').onchange = async (e)=>{
   const url=await getDownloadURL(snap.ref);
   await sendMsg('',url);
   e.target.value='';
-  setTimeout(()=>$('msgInput').focus(),0);
-}
-
-$('msgInput').oninput=()=>{
-  const p=$('previewBar');
-  if($('msgInput').value){p.textContent=$('msgInput').value;p.classList.add('show');}
-  else p.classList.remove('show');
+  $('msgInput').focus();
 }
 
 $('logoutBtn').onclick=async()=>{
   await signOut(auth);
   localStorage.clear();
   location.reload();
-}
+    }
