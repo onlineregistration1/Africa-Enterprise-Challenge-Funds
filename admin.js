@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, doc, getDoc, getDocs, collection, addDoc, query, orderBy, onSnapshot, updateDoc, deleteDoc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, doc, getDocs, collection, addDoc, query, orderBy, onSnapshot, updateDoc, deleteDoc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDh2fHMUbysckAxdIA8dcz8sHWrcLbW1EQ",
@@ -12,6 +13,7 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 const ADMIN_USER="Kibet Davis";
 const ADMIN_PASS="Kwenik254$";
@@ -63,6 +65,7 @@ function openChat(phone,row){
   $('backBtn').classList.remove('hidden');
   $('aHead').textContent='Chat: '+phone;
   listen(phone);
+  setTimeout(()=>$('msgInput').focus(),300); // Auto open keyboard
 }
 
 function closeChat(){
@@ -82,35 +85,50 @@ function listen(phone){
     $('chatBox').innerHTML='';
     snap.forEach(d=>{
       const m=d.data();
-      if(m.delAdmin) return; // admin deleted = blank for both
+      if(m.delAdmin) return;
       const div=document.createElement('div');
       div.className='msg '+(m.sender==='admin'?'sent':'recv');
-      if(m.delUser) div.classList.add('deleted'), div.textContent='Deleted message'; // admin sees "Deleted"
+      if(m.delUser) div.classList.add('deleted'), div.textContent='Deleted message';
+      else if(m.img){ const img=document.createElement('img'); img.src=m.img; div.appendChild(img); }
       else div.textContent=m.text;
-      div.ondblclick=()=>unsend(d.id,phone); // ONLY admin can unsend
+      div.ondblclick=()=>unsend(d.id,phone);
       $('chatBox').appendChild(div);
     });
   });
 }
 
-$('sendBtn').onclick=async()=>{
-  const txt=$('msgInput').value.trim();
-  if(!txt||!activePhone) return;
+async function sendMsg(text='',imgUrl=''){
   await addDoc(collection(db,'chats',activePhone,'messages'),{
-    text:txt,sender:'admin',ts:serverTimestamp(),delUser:false,delAdmin:false
+    text, img:imgUrl||'', sender:'admin', ts:serverTimestamp(), delUser:false, delAdmin:false
   });
   await updateDoc(doc(db,'users',activePhone),{lastSeen:serverTimestamp(),lastSender:'admin'});
+}
+
+$('sendBtn').onclick=async()=>{
+  const txt=$('msgInput').value.trim();
+  if(!txt&&!$('imgInput').files[0]) return;
+  await sendMsg(txt,'');
   $('msgInput').value='';$('previewBar').classList.remove('show');
 }
 
-$('msgInput').oninput=()=>{ 
+$('imgInput').onchange = async (e)=>{
+  const file=e.target.files[0];
+  if(!file||!activePhone) return;
+  const storageRef=ref(storage,`chats/${activePhone}/${Date.now()}_${file.name}`);
+  const snap=await uploadBytes(storageRef,file);
+  const url=await getDownloadURL(snap.ref);
+  await sendMsg('',url);
+  e.target.value='';
+}
+
+$('msgInput').oninput=()=>{
   const p=$('previewBar');
   if($('msgInput').value){p.textContent=$('msgInput').value;p.classList.add('show');}
   else p.classList.remove('show');
 }
 
 async function unsend(id,phone){
-  await updateDoc(doc(db,'chats',phone,'messages',id),{delUser:true,delAdmin:true}); // blank both
+  await updateDoc(doc(db,'chats',phone,'messages',id),{delUser:true,delAdmin:true});
 }
 
 async function delUser(phone){
@@ -120,4 +138,4 @@ async function delUser(phone){
   msgs.forEach(d=>batch.delete(d.ref));
   await batch.commit();
   closeChat(); loadUsers();
-      }
+    }
