@@ -1,165 +1,46 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin</title>
-
-<style>
-body{margin:0;font-family:Arial;background:#0b141a;color:white;}
-
-.container{max-width:500px;margin:auto;padding:10px;}
-
-.box{background:#1f2c34;padding:10px;border-radius:10px;margin-top:10px;}
-
-input,button{width:100%;padding:10px;margin-top:8px;border:none;border-radius:5px;}
-
-button{background:#25D366;color:white;font-weight:bold;}
-
-.user{padding:10px;background:#2a3942;margin:5px;border-radius:5px;cursor:pointer;}
-
-.chat{height:55vh;overflow-y:auto;background:#111b21;padding:10px;}
-
-.msg{padding:8px;margin:5px;border-radius:8px;}
-
-.me{background:#25D366;margin-left:auto;}
-.other{background:#2a3942;}
-
-.logout{background:red;width:auto;padding:5px 10px;}
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Admin | AEF</title>
+<link rel="stylesheet" href="style.css">
 </head>
-
 <body>
+<div id="app">
 
-<div class="container">
+  <div id="loginScreen" class="screen">
+    <h2>Admin Login</h2>
+    <input id="aUser" placeholder="Username" value="Kibet Davis">
+    <div class="pwd-wrap">
+      <input type="password" id="aPass" placeholder="Password">
+      <span class="eye" onclick="togglePwd('aPass')">👁️</span>
+    </div>
+    <button id="aLogin">Login</button>
+    <p id="aMsg"></p>
+  </div>
 
-<div id="login">
-<h3>Admin Login</h3>
-<input id="u" placeholder="Username">
-<input id="p" type="password" placeholder="Password">
-<button onclick="login()">Login</button>
+  <div id="adminScreen" class="screen hidden">
+    <header>
+      <button id="backBtn" class="small hidden">← Back</button>
+      <span id="aHead">Admin</span>
+      <button id="aLogout" class="red small">Logout</button>
+    </header>
+
+    <div id="userList"></div>
+    <div id="chatBox" class="hidden"></div>
+
+    <div id="inputWrap" class="hidden">
+      <div id="previewBar"></div>
+      <div class="row">
+        <input id="msgInput" placeholder="Reply...">
+        <button id="sendBtn">Send</button>
+      </div>
+    </div>
+  </div>
+
 </div>
-
-<div id="panel" style="display:none;">
-
-<h3>Users</h3>
-<div id="users"></div>
-
-<div class="box">
-<h4 id="current">No chat selected</h4>
-
-<div class="chat" id="chat"></div>
-
-<input id="msg" placeholder="message">
-<button onclick="send()">Send</button>
-
-<button onclick="logout()" style="background:red;margin-top:5px;">Logout</button>
-</div>
-
-</div>
-
-</div>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js"></script>
-
-<script>
-const firebaseConfig={
-apiKey:"AIzaSyDh2fHMUbysckAxdIA8dcz8sHWrcLbW1EQ",
-authDomain:"african-enterprise-challenge-f.firebaseapp.com",
-databaseURL:"https://african-enterprise-challenge-f-default-rtdb.firebaseio.com/",
-projectId:"african-enterprise-challenge-f",
-storageBucket:"african-enterprise-challenge-f.firebasestorage.app",
-messagingSenderId:"85146331644",
-appId:"1:85146331644:web:b28599e0c8b75498fe6a79"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db=firebase.database();
-
-let current=null;
-
-// LOGIN
-function login(){
-if(u.value==="Kibet Davis" && p.value==="Kwenik254$"){
-loginUI();
-load();
-}else alert("Wrong login");
-}
-
-function loginUI(){
-login.style.display="none";
-panel.style.display="block";
-}
-
-// USERS
-function load(){
-db.ref("chats").on("value",snap=>{
-users.innerHTML="";
-snap.forEach(c=>{
-let phone=c.key;
-let div=document.createElement("div");
-div.className="user";
-div.innerText=phone;
-div.onclick=()=>open(phone);
-users.appendChild(div);
-});
-});
-}
-
-// OPEN CHAT
-function open(phone){
-current=phone;
-document.getElementById("current").innerText=phone;
-render();
-}
-
-// RENDER CHAT
-function render(){
-db.ref("chats/"+current).on("value",snap=>{
-chat.innerHTML="";
-
-snap.forEach(m=>{
-let d=m.val();
-
-if(d.deletedForAdmin) return;
-
-let div=document.createElement("div");
-div.className="msg";
-div.classList.add(d.sender==="admin"?"me":"other");
-div.innerText=d.text;
-
-chat.appendChild(div);
-});
-
-chat.scrollTop=999999;
-});
-}
-
-// SEND
-function send(){
-if(!current) return;
-
-db.ref("chats/"+current).push({
-sender:"admin",
-text:msg.value,
-time:Date.now(),
-deletedForUser:false,
-deletedForAdmin:false
-});
-
-msg.value="";
-}
-
-// UNSEND (ADMIN DELETE FOR BOTH)
-function unsend(key){
-db.ref("chats/"+current+"/"+key).remove();
-}
-
-function logout(){
-location.reload();
-}
-</script>
-
+<script type="module" src="admin.js"></script>
+<script>window.togglePwd=id=>{let e=document.getElementById(id);e.type=e.type==='password'?'text':'password';}</script>
 </body>
 </html>
