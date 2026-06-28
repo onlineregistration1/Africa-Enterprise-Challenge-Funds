@@ -9,29 +9,47 @@ import {
 doc,
 collection,
 addDoc,
+setDoc,
 query,
 orderBy,
 onSnapshot,
 serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-const messages=document.getElementById("messages");
-const input=document.getElementById("messageInput");
+const messageBox=document.getElementById("messages");
+const messageInput=document.getElementById("messageInput");
 const sendBtn=document.getElementById("sendBtn");
 const logoutBtn=document.getElementById("logoutBtn");
 
 let currentUser=null;
 
-onAuthStateChanged(auth,(user)=>{
+onAuthStateChanged(auth,async(user)=>{
 
 if(!user){
 
-window.location="index.html";
+location.href="index.html";
 return;
 
 }
 
 currentUser=user;
+
+await setDoc(
+
+doc(db,"chats",user.uid),
+
+{
+
+phone:user.email.replace("@aecf.local",""),
+
+lastMessage:"",
+lastTime:serverTimestamp()
+
+},
+
+{merge:true}
+
+);
 
 loadMessages();
 
@@ -41,19 +59,19 @@ logoutBtn.onclick=async()=>{
 
 await signOut(auth);
 
-window.location="index.html";
+location.href="index.html";
 
 };
 
 sendBtn.onclick=async()=>{
 
-const text=input.value.trim();
+const text=messageInput.value.trim();
 
 if(text==="") return;
 
 await addDoc(
 
-collection(db,"users",currentUser.uid,"messages"),
+collection(db,"chats",currentUser.uid,"messages"),
 
 {
 
@@ -69,7 +87,25 @@ time:serverTimestamp()
 
 );
 
-input.value="";
+await setDoc(
+
+doc(db,"chats",currentUser.uid),
+
+{
+
+phone:currentUser.email.replace("@aecf.local",""),
+
+lastMessage:text,
+
+lastTime:serverTimestamp()
+
+},
+
+{merge:true}
+
+);
+
+messageInput.value="";
 
 };
 
@@ -77,7 +113,7 @@ function loadMessages(){
 
 const q=query(
 
-collection(db,"users",currentUser.uid,"messages"),
+collection(db,"chats",currentUser.uid,"messages"),
 
 orderBy("time","asc")
 
@@ -85,63 +121,24 @@ orderBy("time","asc")
 
 onSnapshot(q,(snapshot)=>{
 
-messages.innerHTML="";
+messageBox.innerHTML="";
+  snapshot.forEach((docSnap)=>{
 
-snapshot.forEach((doc)=>{
-
-const data=doc.data();
+const data=docSnap.data();
 
 const bubble=document.createElement("div");
 
-bubble.className="message "+data.sender;
+bubble.className="message";
 
-bubble.innerHTML=data.unsent
-? "<i>Message unsent</i>"
-: data.text;
+if(data.sender==="user"){
 
-messages.appendChild(bubble);
+bubble.classList.add("user");
 
-});
+}else{
 
-messages.scrollTop=messages.scrollHeight;
-
-});
+bubble.classList.add("admin");
 
 }
-import {
-updateDoc,
-deleteDoc
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-let messageRefs=[];
-
-function loadMessages(){
-
-const q=query(
-
-collection(db,"users",currentUser.uid,"messages"),
-
-orderBy("time","asc")
-
-);
-
-onSnapshot(q,(snapshot)=>{
-
-messages.innerHTML="";
-messageRefs=[];
-
-snapshot.forEach((snap)=>{
-
-const data=snap.data();
-
-messageRefs.push({
-id:snap.id,
-sender:data.sender
-});
-
-const bubble=document.createElement("div");
-
-bubble.className="message "+data.sender;
 
 if(data.unsent){
 
@@ -149,25 +146,54 @@ bubble.innerHTML="<i>Message unsent</i>";
 
 }else{
 
-bubble.innerHTML=data.text;
+bubble.textContent=data.text;
 
 }
 
-if(data.sender==="user"){
+messageBox.appendChild(bubble);
 
-bubble.oncontextmenu=(e)=>{
+});
 
-e.preventDefault();
+messageBox.scrollTop=messageBox.scrollHeight;
 
-unsendMessage(snap.id);
+});
 
-};
+}
+
+messageInput.addEventListener("keypress",(e)=>{
+
+if(e.key==="Enter"){
+
+sendBtn.click();
+
+}
+
+});
+let pressTimer=null;
+
+function enableUnsend(bubble,id,data){
+
+if(data.sender!=="user") return;
 
 bubble.ontouchstart=()=>{
 
-pressTimer=setTimeout(()=>{
+pressTimer=setTimeout(async()=>{
 
-unsendMessage(snap.id);
+const ok=confirm("Unsend this message?");
+
+if(!ok) return;
+
+await updateDoc(
+
+doc(db,"chats",currentUser.uid,"messages",id),
+
+{
+
+unsentByUser:true
+
+}
+
+);
 
 },700);
 
@@ -180,35 +206,3 @@ clearTimeout(pressTimer);
 };
 
 }
-
-messages.appendChild(bubble);
-
-});
-
-messages.scrollTop=messages.scrollHeight;
-
-});
-
-}
-
-async function unsendMessage(id){
-
-const ok=confirm("Unsend this message?");
-
-if(!ok)return;
-
-await updateDoc(
-
-doc(db,"users",currentUser.uid,"messages",id),
-
-{
-
-unsent:true
-
-}
-
-);
-
-}
-
-let pressTimer;
