@@ -9,200 +9,108 @@ import {
 doc,
 collection,
 addDoc,
-setDoc,
 query,
 orderBy,
 onSnapshot,
 serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-const messageBox=document.getElementById("messages");
-const messageInput=document.getElementById("messageInput");
+const messagesBox=document.getElementById("messages");
+const input=document.getElementById("messageInput");
 const sendBtn=document.getElementById("sendBtn");
 const logoutBtn=document.getElementById("logoutBtn");
 
 let currentUser=null;
 
-onAuthStateChanged(auth,async(user)=>{
+/* =========================
+   AUTH CHECK
+========================= */
+
+onAuthStateChanged(auth,(user)=>{
 
 if(!user){
-
-location.href="index.html";
+window.location="index.html";
 return;
-
 }
 
 currentUser=user;
-
-await setDoc(
-
-doc(db,"chats",user.uid),
-
-{
-
-phone:user.email.replace("@aecf.local",""),
-
-lastMessage:"",
-lastTime:serverTimestamp()
-
-},
-
-{merge:true}
-
-);
 
 loadMessages();
 
 });
 
-logoutBtn.onclick=async()=>{
+/* =========================
+   LOGOUT
+========================= */
+
+logoutBtn.addEventListener("click",async()=>{
 
 await signOut(auth);
+window.location="index.html";
 
-location.href="index.html";
+});
 
-};
+/* =========================
+   SEND MESSAGE
+========================= */
 
-sendBtn.onclick=async()=>{
+sendBtn.addEventListener("click",async()=>{
 
-const text=messageInput.value.trim();
+const text=input.value.trim();
+if(!text) return;
 
-if(text==="") return;
-
-await addDoc(
-
-collection(db,"chats",currentUser.uid,"messages"),
-
-{
-
+await addDoc(collection(db,"chats",currentUser.uid,"messages"),{
 sender:"user",
-
 text:text,
-
 unsent:false,
-
 time:serverTimestamp()
+});
 
-}
+input.value="";
 
-);
+});
 
-await setDoc(
-
-doc(db,"chats",currentUser.uid),
-
-{
-
-phone:currentUser.email.replace("@aecf.local",""),
-
-lastMessage:text,
-
-lastTime:serverTimestamp()
-
-},
-
-{merge:true}
-
-);
-
-messageInput.value="";
-
-};
+/* =========================
+   LOAD MESSAGES (REALTIME)
+========================= */
 
 function loadMessages(){
 
 const q=query(
-
 collection(db,"chats",currentUser.uid,"messages"),
-
 orderBy("time","asc")
-
 );
 
 onSnapshot(q,(snapshot)=>{
 
-messageBox.innerHTML="";
-  snapshot.forEach((docSnap)=>{
+messagesBox.innerHTML="";
+
+snapshot.forEach((docSnap)=>{
 
 const data=docSnap.data();
 
-const bubble=document.createElement("div");
-
-bubble.className="message";
+const div=document.createElement("div");
+div.classList.add("msg");
 
 if(data.sender==="user"){
-
-bubble.classList.add("user");
-
+div.classList.add("me");
 }else{
-
-bubble.classList.add("admin");
-
+div.classList.add("other");
 }
 
 if(data.unsent){
-
-bubble.innerHTML="<i>Message unsent</i>";
-
+div.innerHTML="<i>Message unsent</i>";
 }else{
-
-bubble.textContent=data.text;
-
+div.textContent=data.text;
 }
 
-messageBox.appendChild(bubble);
+messagesBox.appendChild(div);
 
 });
 
-messageBox.scrollTop=messageBox.scrollHeight;
+/* auto scroll like WhatsApp */
+messagesBox.scrollTop=messagesBox.scrollHeight;
 
 });
-
-}
-
-messageInput.addEventListener("keypress",(e)=>{
-
-if(e.key==="Enter"){
-
-sendBtn.click();
-
-}
-
-});
-let pressTimer=null;
-
-function enableUnsend(bubble,id,data){
-
-if(data.sender!=="user") return;
-
-bubble.ontouchstart=()=>{
-
-pressTimer=setTimeout(async()=>{
-
-const ok=confirm("Unsend this message?");
-
-if(!ok) return;
-
-await updateDoc(
-
-doc(db,"chats",currentUser.uid,"messages",id),
-
-{
-
-unsentByUser:true
-
-}
-
-);
-
-},700);
-
-};
-
-bubble.ontouchend=()=>{
-
-clearTimeout(pressTimer);
-
-};
 
 }
