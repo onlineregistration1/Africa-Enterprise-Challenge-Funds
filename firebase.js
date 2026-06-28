@@ -1,14 +1,11 @@
-// Firebase SDK Imports
+// Firebase Configuration - Africa Enterprise Challenge Funds
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-import {
-  getAuth
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-import {
-  getFirestore
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-// Firebase Configuration
+import { getFirestore } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyDh2fHMUbysckAxdIA8dcz8sHWrcLbW1EQ",
   authDomain: "african-enterprise-challenge-f.firebaseapp.com",
@@ -19,11 +16,10 @@ const firebaseConfig = {
   measurementId: "G-6C670QY54S"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Services
 const auth = getAuth(app);
+
 const db = getFirestore(app);
 
-export { auth, db };
+export { app, auth, db };
