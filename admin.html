@@ -33,7 +33,10 @@
     <div id="inputWrap" class="hidden">
       <div id="previewBar"></div>
       <div class="row">
-        <input id="msgInput" placeholder="Reply...">
+        <label class="attachBtn">+
+          <input type="file" id="imgInput" accept="image/*" hidden>
+        </label>
+        <input id="msgInput" placeholder="Reply..." autocomplete="off">
         <button id="sendBtn">Send</button>
       </div>
     </div>
