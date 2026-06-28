@@ -1,6 +1,6 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, orderBy, onSnapshot, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDh2fHMUbysckAxdIA8dcz8sHWrcLbW1EQ",
@@ -8,65 +8,96 @@ const firebaseConfig = {
   projectId: "african-enterprise-challenge-f",
   storageBucket: "african-enterprise-challenge-f.firebasestorage.app",
   messagingSenderId: "85146331644",
-  appId: "1:85146331644:web:b28599e0c8b75498fe6a79"
+  appId: "1:85146331644:web:b28599e0c8b75498fe6a79",
+  measurementId: "G-6C670QY54S"
 };
-
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
-// --- AUTHENTICATION LOGIC ---
-document.getElementById('auth-button').addEventListener('click', async () => {
-    const phone = document.getElementById('phone-input').value;
-    const pass = document.getElementById('password-input').value;
-    const email = phone + "@chat.com"; // Creating a mock email for Firebase Auth
+const $ = id=>document.getElementById(id);
+let phone = localStorage.getItem('phone');
+let unsub = null;
 
-    try {
-        await signInWithEmailAndPassword(auth, email, pass);
-    } catch (error) {
-        if (error.code === 'auth/user-not-found') {
-            await createUserWithEmailAndPassword(auth, email, pass);
-        } else {
-            alert("Login failed: " + error.message);
-        }
+if(phone){ enterChat(phone); } else { showAuth(); }
+
+function showAuth(){
+  $('authScreen').classList.remove('hidden');
+  $('chatScreen').classList.add('hidden');
+}
+
+$('authBtn').onclick = async ()=>{
+  const ph = $('phone').value.trim();
+  const pw = $('pwd').value;
+  const rep = $('repPwd').value;
+  $('authMsg').textContent='';
+  if(!ph || !pw) return $('authMsg').textContent='Fill all fields';
+  const email = ph+'@aef.chat';
+
+  const uRef = doc(db,'users',ph);
+  const snap = await getDoc(uRef);
+
+  try{
+    if(snap.exists()){
+      $('repWrap').classList.add('hidden');
+      await signInWithEmailAndPassword(auth, email, pw);
+    }else{
+      if(pw!==rep) return $('authMsg').textContent='Passwords do not match';
+      await createUserWithEmailAndPassword(auth, email, pw);
+      await setDoc(uRef,{createdAt:serverTimestamp(),lastSeen:serverTimestamp(),lastSender:'none'});
     }
-});
+    localStorage.setItem('phone',ph);
+    enterChat(ph);
+  }catch(e){ $('authMsg').textContent=e.message; }
+}
 
-// --- REAL-TIME CHAT LOGIC ---
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        document.getElementById('login-view').style.display = 'none';
-        document.getElementById('chat-room-view').style.display = 'block';
-        
-        // Listen to messages for this specific user
-        const q = query(collection(db, "chats", user.uid, "messages"), orderBy("timestamp", "asc"));
-        onSnapshot(q, (snapshot) => {
-            const container = document.getElementById('messages-container');
-            container.innerHTML = '';
-            snapshot.forEach((doc) => {
-                const data = doc.data();
-                const div = document.createElement('div');
-                div.className = `message ${data.sender === user.uid ? 'sent' : 'received'}`;
-                div.innerText = data.text;
-                container.appendChild(div);
-            });
-        });
-    }
-});
+function enterChat(ph){
+  phone=ph;
+  $('authScreen').classList.add('hidden');
+  $('chatScreen').classList.remove('hidden');
+  $('chatHead').textContent = ph;
+  listen(ph);
+}
 
-// --- SEND MESSAGE ---
-document.getElementById('send-btn').addEventListener('click', async () => {
-    const text = document.getElementById('message-text').value;
-    const user = auth.currentUser;
-    if (text && user) {
-        await addDoc(collection(db, "chats", user.uid, "messages"), {
-            text: text,
-            sender: user.uid,
-            timestamp: serverTimestamp()
-        });
-        document.getElementById('message-text').value = '';
-    }
-});
+function listen(ph){
+  if(unsub) unsub();
+  const q = query(collection(db,'chats',ph,'messages'), orderBy('ts','desc'));
+  unsub = onSnapshot(q, snap=>{
+    const box=$('chatBox'); box.innerHTML='';
+    snap.forEach(d=>{
+      const m=d.data();
+      if(m.delUser) return; // user cannot see deleted
+      const div=document.createElement('div');
+      div.className='msg '+(m.sender==='user'?'sent':'recv');
+      div.textContent=m.text;
+      div.ondblclick=()=>unsend(d.id,ph);
+      box.appendChild(div);
+    });
+  });
+}
 
-// --- LOGOUT ---
-document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+$('sendBtn').onclick = async ()=>{
+  const txt=$('msgInput').value.trim();
+  if(!txt) return;
+  await addDoc(collection(db,'chats',phone,'messages'),{
+    text:txt, sender:'user', ts:serverTimestamp(), delUser:false, delAdmin:false
+  });
+  await updateDoc(doc(db,'users',phone),{lastSeen:serverTimestamp(),lastSender:'user'});
+  $('msgInput').value=''; $('previewBar').classList.remove('show');
+}
+
+$('msgInput').oninput=()=>{ 
+  const p=$('previewBar');
+  if($('msgInput').value){p.textContent=$('msgInput').value;p.classList.add('show');}
+  else p.classList.remove('show');
+}
+
+async function unsend(id,ph){
+  await updateDoc(doc(db,'chats',ph,'messages',id),{delUser:true});
+}
+
+$('logoutBtn').onclick=async()=>{
+  await signOut(auth);
+  localStorage.clear();
+  location.reload();
+}
