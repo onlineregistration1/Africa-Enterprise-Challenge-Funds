@@ -3,12 +3,7 @@
 <head>
 
 <meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width,
-initial-scale=1.0,
-maximum-scale=1.0,
-user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <title>Chat</title>
 
@@ -16,133 +11,103 @@ user-scalable=no">
 
 <style>
 
-body{
+/* Chat layout (WhatsApp style) */
 
-margin:0;
-background:#ece5dd;
-font-family:Arial,Helvetica,sans-serif;
-
-}
-
-.chatContainer{
-
+.chat-container{
 width:100%;
 max-width:420px;
 height:100vh;
 margin:auto;
 display:flex;
 flex-direction:column;
-background:white;
-
+background:#e5ddd5;
 }
 
-.topBar{
-
+.chat-header{
 background:#075E54;
 color:white;
-padding:14px;
+padding:12px;
 display:flex;
 justify-content:space-between;
 align-items:center;
 font-weight:bold;
-font-size:18px;
-
 }
 
-.logoutBtn{
-
+.logout{
 background:red;
-border:none;
 color:white;
-padding:7px 12px;
+border:none;
+padding:6px 10px;
 border-radius:6px;
-font-size:13px;
+font-size:12px;
 cursor:pointer;
-
 }
 
 .messages{
-
 flex:1;
 overflow-y:auto;
-padding:12px;
-background:#ece5dd;
-
-}
-
-.message{
-
-max-width:80%;
 padding:10px;
-margin-bottom:10px;
-border-radius:10px;
-word-wrap:break-word;
-font-size:15px;
-
-}
-
-.user{
-
-background:#DCF8C6;
-margin-left:auto;
-
-}
-
-.admin{
-
-background:white;
-margin-right:auto;
-
-}
-
-.bottom{
-
-padding:10px;
-background:white;
-border-top:1px solid #ddd;
-
-}
-
-.inputRow{
-
 display:flex;
+flex-direction:column;
 gap:8px;
-
 }
 
-#messageInput{
+.msg{
+max-width:75%;
+padding:10px;
+border-radius:10px;
+font-size:14px;
+word-wrap:break-word;
+}
 
+.me{
+background:#DCF8C6;
+align-self:flex-end;
+}
+
+.other{
+background:white;
+align-self:flex-start;
+}
+
+.chat-input{
+display:flex;
+padding:10px;
+background:white;
+gap:8px;
+}
+
+.chat-input input{
 flex:1;
-padding:12px;
+padding:10px;
 border-radius:8px;
-border:1px solid #bbb;
-font-size:16px;
-
+border:1px solid #ccc;
 }
 
-#sendBtn{
-
+.chat-input button{
 background:#25D366;
-color:white;
 border:none;
-padding:12px 18px;
+color:white;
+padding:10px 14px;
 border-radius:8px;
+font-weight:bold;
 cursor:pointer;
-
 }
 
-.whatsappBtn{
+.whatsapp-link{
+text-align:center;
+padding:10px;
+background:white;
+}
 
-display:block;
-margin-top:10px;
+.whatsapp-link a{
 background:#25D366;
 color:white;
-text-align:center;
-padding:12px;
+padding:10px;
+display:block;
 border-radius:8px;
 text-decoration:none;
 font-weight:bold;
-
 }
 
 </style>
@@ -151,53 +116,30 @@ font-weight:bold;
 
 <body>
 
-<div class="chatContainer">
+<div class="chat-container">
 
-<div class="topBar">
+<div class="chat-header">
 
 <span>Support Chat</span>
 
-<button
-class="logoutBtn"
-id="logoutBtn">
-
-Logout
-
-</button>
+<button class="logout" id="logoutBtn">Logout</button>
 
 </div>
 
-<div
-class="messages"
-id="messages">
+<div class="messages" id="messages"></div>
+
+<div class="chat-input">
+
+<input type="text" id="messageInput" placeholder="Type message...">
+
+<button id="sendBtn">Send</button>
 
 </div>
 
-<div class="bottom">
+<div class="whatsapp-link">
 
-<div class="inputRow">
-
-<input
-type="text"
-id="messageInput"
-placeholder="Type your message...">
-
-<button
-id="sendBtn">
-
-Send
-
-</button>
-
-</div>
-
-<a
-class="whatsappBtn"
-href="https://wa.me/254734081951?text=Hello!%20I'd%20like%20this%20Programme."
-target="_blank">
-
-💬 Chat us via WhatsApp
-
+<a href="https://wa.me/254734081951?text=Hello!%20I'd%20like%20this%20Programme." target="_blank">
+Chat us via WhatsApp
 </a>
 
 </div>
