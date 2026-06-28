@@ -7,7 +7,35 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="app"></div>
+    <div id="app-container">
+        <!-- Login Section -->
+        <div id="login-view" class="view">
+            <h2>Welcome</h2>
+            <input type="text" id="phone-input" placeholder="Phone Number">
+            <div class="password-wrapper">
+                <input type="password" id="password-input" placeholder="Password">
+                <span id="toggle-pass">👁️</span>
+            </div>
+            <button id="auth-button">Login / Create Account</button>
+        </div>
+
+        <!-- Chat List Section -->
+        <div id="chat-list-view" class="view" style="display:none;">
+            <button id="logout-btn" class="red-btn">Logout</button>
+            <div id="user-list"></div>
+        </div>
+
+        <!-- Chat Room Section -->
+        <div id="chat-room-view" class="view" style="display:none;">
+            <button onclick="showChatList()">Back</button>
+            <div id="messages-container"></div>
+            <div class="chat-input-area">
+                <input type="text" id="message-text" placeholder="Type a message...">
+                <button id="send-btn">Send</button>
+            </div>
+            <a href="https://wa.me/254734081951?text=Hello!%20I'd%20like%20this%20Programme." class="wa-link">Chat us via WhatsApp</a>
+        </div>
+    </div>
     <script type="module" src="app.js"></script>
 </body>
 </html>
