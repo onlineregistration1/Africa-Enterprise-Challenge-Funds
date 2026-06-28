@@ -8,103 +8,67 @@ onAuthStateChanged
 
 import {
 collection,
-doc,
-getDoc,
-setDoc,
-deleteDoc,
 query,
-orderBy,
 onSnapshot,
 addDoc,
-serverTimestamp
+orderBy,
+serverTimestamp,
+setDoc,
+doc
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-/* =========================
-   ADMIN LOGIN DETAILS
-========================= */
-
-const ADMIN_EMAIL="admin@aecf.local";
+const ADMIN_USER="Kibet Davis";
 const ADMIN_PASS="Kwenik254$";
 
-/* =========================
-   ELEMENTS
-========================= */
+const usersDiv=document.getElementById("users");
+const loginBox=document.getElementById("loginAdmin");
+const panel=document.getElementById("panel");
 
-const usersList=document.getElementById("usersList");
-const chatBox=document.getElementById("chatBox");
 const adminMessages=document.getElementById("adminMessages");
-const adminInput=document.getElementById("adminInput");
-const adminSend=document.getElementById("adminSend");
-const chatTitle=document.getElementById("chatTitle");
+const adminMsg=document.getElementById("adminMsg");
 
-const backBtn=document.getElementById("backBtn");
-const logoutBtn=document.getElementById("adminLogout");
+let currentChat=null;
 
-let currentChatUser=null;
+/* LOGIN */
 
-/* =========================
-   AUTO ADMIN LOGIN
-========================= */
+document.getElementById("adminLoginBtn").onclick=async()=>{
 
-async function adminLogin(){
+const u=document.getElementById("adminUser").value;
+const p=document.getElementById("adminPass").value;
 
-try{
-
-await signInWithEmailAndPassword(auth,ADMIN_EMAIL,ADMIN_PASS);
-
-loadUsers();
-
-}catch(e){
-
-console.log("Admin login failed",e);
-
-}
-
-}
-
-/* =========================
-   AUTH CHECK
-========================= */
-
-onAuthStateChanged(auth,(user)=>{
-
-if(!user){
-
-adminLogin();
-
+if(u!==ADMIN_USER || p!==ADMIN_PASS){
+alert("Wrong admin login");
 return;
-
 }
+
+loginBox.style.display="none";
+panel.style.display="block";
 
 loadUsers();
 
-});
+};
 
-/* =========================
-   LOAD USERS
-========================= */
+/* LOAD USERS */
 
 function loadUsers(){
 
 const q=query(collection(db,"users"));
 
-onSnapshot(q,(snapshot)=>{
+onSnapshot(q,(snap)=>{
 
-usersList.innerHTML="";
+usersDiv.innerHTML="";
 
-snapshot.forEach((docSnap)=>{
-
-const data=docSnap.data();
+snap.forEach(u=>{
 
 const div=document.createElement("div");
 
-div.classList.add("user");
+div.className="user";
 
-div.innerHTML=`<span>${data.phone}</span>`;
+div.innerHTML=u.data().phone;
 
-div.onclick=()=>openChat(docSnap.id,data.phone);
+div.onclick=()=>openChat(u.id,u.data().phone);
 
-usersList.appendChild(div);
+usersDiv.appendChild(div);
 
 });
 
@@ -112,96 +76,32 @@ usersList.appendChild(div);
 
 }
 
-/* =========================
-   OPEN CHAT
-========================= */
+/* OPEN CHAT */
 
 function openChat(uid,phone){
 
-currentChatUser=uid;
-
-chatTitle.innerText=phone;
-
-chatBox.style.display="flex";
-
-usersList.style.display="none";
-
-loadChat(uid);
-
-}
-
-/* =========================
-   BACK BUTTON
-========================= */
-
-backBtn.onclick=()=>{
-
-chatBox.style.display="none";
-
-usersList.style.display="block";
-
-adminMessages.innerHTML="";
-
-};
-
-/* =========================
-   LOAD MESSAGES
-========================= */
-
-function loadChat(uid){
+currentChat=uid;
 
 const q=query(
 collection(db,"chats",uid,"messages"),
 orderBy("time","asc")
 );
 
-onSnapshot(q,(snapshot)=>{
+onSnapshot(q,(snap)=>{
 
 adminMessages.innerHTML="";
 
-snapshot.forEach((docSnap)=>{
+snap.forEach(d=>{
 
-const data=docSnap.data();
+const data=d.data();
 
 const div=document.createElement("div");
 
 div.classList.add("msg");
 
-if(data.sender==="user"){
-div.classList.add("me");
-}else{
-div.classList.add("other");
-}
+div.classList.add(data.sender==="user"?"me":"other");
 
-if(data.unsentByUser){
-
-div.innerHTML="<i>Message unsent by user</i>";
-
-}else if(data.unsentByAdmin){
-
-return;
-
-}else{
-
-div.textContent=data.text;
-
-}
-
-/* long press delete for admin */
-
-div.oncontextmenu=async(e)=>{
-
-e.preventDefault();
-
-if(confirm("Delete this message for everyone?")){
-
-await setDoc(doc(db,"chats",uid,"messages",docSnap.id),{
-unsentByAdmin:true
-},{merge:true});
-
-}
-
-};
+div.textContent=String(data.text||"");
 
 adminMessages.appendChild(div);
 
@@ -213,37 +113,21 @@ adminMessages.scrollTop=adminMessages.scrollHeight;
 
 }
 
-/* =========================
-   SEND ADMIN MESSAGE
-========================= */
+/* SEND ADMIN MESSAGE */
 
-adminSend.onclick=async()=>{
+document.getElementById("adminSend").onclick=async()=>{
 
-const text=adminInput.value.trim();
+if(!currentChat) return;
 
-if(!text||!currentChatUser) return;
+const text=adminMsg.value.trim();
+if(!text) return;
 
-await addDoc(collection(db,"chats",currentChatUser,"messages"),{
-
+await addDoc(collection(db,"chats",currentChat,"messages"),{
 sender:"admin",
 text:text,
-unsentByAdmin:false,
 time:serverTimestamp()
-
 });
 
-adminInput.value="";
-
-};
-
-/* =========================
-   LOGOUT
-========================= */
-
-logoutBtn.onclick=async()=>{
-
-await signOut(auth);
-
-location.reload();
+adminMsg.value="";
 
 };
