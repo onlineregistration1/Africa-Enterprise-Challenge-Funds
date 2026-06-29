@@ -3,730 +3,960 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Admin Panel – ChatApp</title>
+<title>Admin Panel</title>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  
+  :root {
+    --green: #25D366;
+    --dark-green: #128C7E;
+    --teal: #075E54;
+    --bg: #0d1117;
+    --header-bg: #1a1f2e;
+    --sent-bg: #1a6b9a;
+    --received-bg: #1e2635;
+    --text-primary: #e9edef;
+    --text-secondary: #8696a0;
+    --border: #2a3441;
+    --input-bg: #1e2635;
+    --red: #e53935;
+    --unread: #25D366;
+  }
 
-body {
-  font-family:'Segoe UI',sans-serif;
-  background:#0b1014; color:#fff;
-  height:100dvh; display:flex; flex-direction:column; overflow:hidden;
-}
+  html, body {
+    height: 100%; width: 100%;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+  }
 
-/* ── LOADING ── */
-#loading-overlay {
-  position:fixed; inset:0; background:#0b1014;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:16px; z-index:999;
-}
-.loader {
-  width:36px; height:36px;
-  border:3px solid #2c3e4a; border-top-color:#f39c12;
-  border-radius:50%; animation:spin .8s linear infinite;
-}
-@keyframes spin { to { transform:rotate(360deg); } }
+  /* ===== ADMIN LOGIN ===== */
+  #admin-login {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    padding: 24px;
+    background: linear-gradient(135deg, #075E54 0%, #0d1117 60%);
+  }
 
-/* ── ADMIN LOGIN ── */
-#admin-login {
-  flex:1; display:flex; flex-direction:column;
-  align-items:center; justify-content:center;
-  background:linear-gradient(160deg,#0b1014 0%,#1a2a35 100%);
-  padding:24px;
-}
-.admin-logo  { font-size:52px; margin-bottom:8px; }
-.admin-title { font-size:24px; font-weight:700; color:#f39c12; margin-bottom:4px; }
-.admin-sub   { font-size:13px; color:#8a9ba8; margin-bottom:32px; }
+  .admin-logo {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
 
-.auth-card {
-  background:#1c2b33; border-radius:16px; padding:28px 24px;
-  width:100%; max-width:380px; box-shadow:0 8px 32px rgba(0,0,0,.5);
-}
-.auth-card h2         { font-size:18px; font-weight:600; margin-bottom:20px; color:#e8f4f8; }
-.input-group          { margin-bottom:16px; }
-.input-group label    { font-size:12px; color:#8a9ba8; display:block; margin-bottom:6px; font-weight:500; }
-.input-group input    {
-  width:100%; padding:14px 16px; background:#0d1f2b;
-  border:1.5px solid #2c3e4a; border-radius:10px;
-  color:#fff; font-size:16px; outline:none;
-}
-.input-group input:focus        { border-color:#f39c12; }
-.input-group input::placeholder { color:#4a6070; }
+  .admin-login-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+  }
 
-.pw-wrap       { position:relative; }
-.pw-wrap input { padding-right:48px; }
-.eye-btn {
-  position:absolute; right:14px; top:50%; transform:translateY(-50%);
-  background:none; border:none; cursor:pointer; color:#8a9ba8; font-size:18px; padding:4px;
-}
+  .admin-login-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 32px;
+  }
 
-.btn-primary {
-  width:100%; padding:15px; background:#f39c12; border:none;
-  border-radius:10px; color:#fff; font-size:16px; font-weight:700;
-  cursor:pointer; margin-top:8px;
-}
-.btn-primary:active { background:#d68910; }
-.msg-err { font-size:13px; color:#ff6b6b; margin-top:10px; text-align:center; min-height:18px; }
+  .admin-form { width: 100%; max-width: 340px; }
 
-/* ── ADMIN PANEL wrapper ── */
-#admin-panel { flex:1; display:none; flex-direction:column; height:100dvh; overflow:hidden; }
+  .a-form-group { margin-bottom: 18px; }
 
-/* ── SHARED TOP BAR ── */
-.top-bar {
-  background:#1c2b33; padding:10px 14px;
-  display:flex; align-items:center; justify-content:space-between;
-  border-bottom:1px solid #2c3e4a; min-height:56px; flex-shrink:0;
-}
-.top-bar-title { font-size:17px; font-weight:700; color:#f39c12; }
-.top-bar-right { display:flex; align-items:center; gap:8px; }
+  .a-form-label {
+    display: block;
+    font-size: 12px;
+    color: var(--green);
+    font-weight: 600;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
 
-.btn-wa {
-  background:#25d366; border:none; border-radius:8px;
-  color:#fff; font-size:12px; font-weight:700; padding:7px 10px;
-  display:flex; align-items:center; gap:5px; text-decoration:none; white-space:nowrap;
-}
-.btn-wa svg { width:15px; height:15px; fill:#fff; flex-shrink:0; }
-.btn-logout {
-  background:#e74c3c; border:none; border-radius:8px;
-  color:#fff; font-size:12px; font-weight:700; padding:7px 10px; cursor:pointer; white-space:nowrap;
-}
-.btn-back {
-  background:none; border:none; color:#f39c12;
-  font-size:22px; cursor:pointer; padding:4px 8px; line-height:1;
-}
+  .a-form-input {
+    width: 100%;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    padding: 13px 44px 13px 14px;
+    color: #fff;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
 
-/* ── USERS LIST VIEW ── */
-#users-view { display:flex; flex-direction:column; flex:1; overflow:hidden; }
+  .a-form-input:focus { border-color: var(--green); }
+  .a-form-input::placeholder { color: rgba(255,255,255,0.35); }
 
-.hint-text {
-  font-size:11px; color:#4a6070; text-align:center;
-  padding:6px 16px; background:#0d1f2b; flex-shrink:0;
-}
+  .a-input-wrap { position: relative; }
 
-#users-list { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; }
-#users-list::-webkit-scrollbar       { width:3px; }
-#users-list::-webkit-scrollbar-thumb { background:#2c3e4a; border-radius:2px; }
+  .a-eye-btn {
+    position: absolute; right: 12px; top: 50%;
+    transform: translateY(-50%);
+    background: none; border: none;
+    color: rgba(255,255,255,0.5);
+    cursor: pointer; font-size: 18px; padding: 4px;
+  }
 
-.user-item {
-  display:flex; align-items:center; gap:12px;
-  padding:13px 16px; border-bottom:1px solid #111d24;
-  cursor:pointer; transition:background .15s;
-}
-.user-item:active { background:#1c2b33; }
+  .a-login-btn {
+    width: 100%;
+    padding: 15px;
+    background: var(--green);
+    border: none; border-radius: 28px;
+    color: #fff; font-size: 16px; font-weight: 700;
+    cursor: pointer; margin-top: 8px;
+    transition: opacity 0.2s;
+  }
 
-.ui-avatar {
-  width:46px; height:46px; border-radius:50%; background:#2c3e4a;
-  display:flex; align-items:center; justify-content:center;
-  font-size:17px; font-weight:700; color:#f39c12; flex-shrink:0;
-}
-.ui-info   { flex:1; min-width:0; }
-.ui-name   {
-  font-size:15px; font-weight:600; color:#e8f4f8;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-}
-.ui-name.unread { color:#25d366; }
-.ui-last   {
-  font-size:13px; color:#8a9ba8; margin-top:2px;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-}
-.ui-meta   { display:flex; flex-direction:column; align-items:flex-end; gap:5px; }
-.ui-time   { font-size:11px; color:#8a9ba8; white-space:nowrap; }
-.ui-dot    {
-  width:10px; height:10px; background:#25d366;
-  border-radius:50%; display:none;
-}
-.ui-dot.show { display:block; }
+  .a-login-btn:active { opacity: 0.85; }
 
-.spinner   { text-align:center; color:#f39c12; padding:28px; font-size:13px; }
-.empty-msg { text-align:center; color:#4a6070; padding:40px 20px; font-size:14px; }
+  .a-login-error {
+    background: rgba(229,57,53,0.15);
+    border: 1px solid rgba(229,57,53,0.4);
+    color: #ff6b6b;
+    padding: 10px 14px; border-radius: 8px;
+    font-size: 13px; margin-bottom: 16px; display: none;
+  }
 
-/* ── SINGLE CHAT VIEW ── */
-#chat-view { display:none; flex-direction:column; flex:1; overflow:hidden; }
+  /* ===== ADMIN MAIN LAYOUT ===== */
+  #admin-main {
+    display: none;
+    height: 100vh;
+    height: 100dvh;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+  }
 
-.chat-user-phone  { font-size:15px; font-weight:700; color:#e8f4f8; }
-.chat-user-status { font-size:11px; color:#25d366; }
+  /* Admin header */
+  .admin-header {
+    background: var(--teal);
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    min-height: 52px;
+  }
 
-.cv-avatar {
-  width:36px; height:36px; border-radius:50%; background:#2c3e4a; flex-shrink:0;
-  display:flex; align-items:center; justify-content:center;
-  font-size:14px; font-weight:700; color:#f39c12;
-}
+  .admin-header-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+  }
 
-/* messages */
-#admin-messages {
-  flex:1; overflow-y:auto; padding:12px 10px;
-  display:flex; flex-direction:column; gap:2px;
-  background:#0b1014; -webkit-overflow-scrolling:touch;
-}
-#admin-messages::-webkit-scrollbar       { width:3px; }
-#admin-messages::-webkit-scrollbar-thumb { background:#2c3e4a; border-radius:2px; }
+  .admin-header-sub {
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+  }
 
-.day-divider { text-align:center; margin:10px 0; }
-.day-divider span {
-  background:#1c2b33; color:#8a9ba8;
-  font-size:11px; padding:4px 12px; border-radius:10px;
-}
+  .admin-logout-btn {
+    background: var(--red);
+    color: #fff; border: none;
+    padding: 6px 12px; border-radius: 16px;
+    font-size: 12px; font-weight: 600;
+    cursor: pointer;
+  }
 
-.msg-bubble-wrap          { display:flex; flex-direction:column; margin-bottom:3px; }
-.msg-bubble-wrap.sent     { align-items:flex-end; }
-.msg-bubble-wrap.received { align-items:flex-start; }
+  /* Users list view */
+  #users-view {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+  }
 
-.msg-bubble {
-  max-width:78%; padding:9px 13px; border-radius:12px;
-  font-size:15px; line-height:1.45; word-break:break-word;
-}
-.sent .msg-bubble     { background:#005c4b; color:#e8f4f8; border-bottom-right-radius:3px; }
-.received .msg-bubble { background:#1c2b33; color:#e8f4f8; border-bottom-left-radius:3px; }
+  .users-search {
+    padding: 8px 12px;
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
 
-.msg-unsent-bubble { background:transparent !important; border:1.5px dashed #2c3e4a !important; }
-.msg-unsent-text   { font-style:italic; color:#4a6070; font-size:13px; }
+  .users-search input {
+    width: 100%;
+    background: var(--input-bg);
+    border: none; border-radius: 20px;
+    padding: 8px 14px;
+    color: var(--text-primary);
+    font-size: 14px; outline: none;
+  }
 
-.msg-meta      { font-size:10px; color:#8a9ba8; margin-top:2px; padding:0 4px; }
-.sent .msg-meta{ text-align:right; }
+  .users-search input::placeholder { color: var(--text-secondary); }
 
-/* bottom input */
-.chat-bottom {
-  background:#1c2b33; padding:10px;
-  flex-shrink:0; border-top:1px solid #2c3e4a;
-}
-.input-row { display:flex; align-items:flex-end; gap:8px; }
+  .users-list {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 
-#admin-input {
-  flex:1; background:#0d1f2b; border:1.5px solid #2c3e4a; border-radius:22px;
-  color:#fff; font-size:16px; padding:11px 18px; outline:none; resize:none;
-  max-height:120px; min-height:44px; line-height:1.4;
-  font-family:inherit; overflow-y:auto;
-}
-#admin-input:focus        { border-color:#f39c12; }
-#admin-input::placeholder { color:#4a6070; }
+  .user-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+    -webkit-user-select: none;
+    user-select: none;
+  }
 
-#admin-send-btn {
-  width:44px; height:44px; border-radius:50%; background:#f39c12;
-  border:none; cursor:pointer;
-  display:flex; align-items:center; justify-content:center; flex-shrink:0;
-}
-#admin-send-btn:active { background:#d68910; }
-#admin-send-btn svg    { width:22px; height:22px; fill:#fff; }
+  .user-item:active { background: var(--header-bg); }
 
-/* ── BOTTOM SHEETS ── */
-.sheet-overlay {
-  position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:90; display:none;
-}
-.sheet-overlay.open { display:block; }
+  .user-item-avatar {
+    width: 46px; height: 46px;
+    background: var(--dark-green);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700; color: #fff;
+    flex-shrink: 0; margin-right: 12px;
+  }
 
-.bottom-sheet {
-  position:fixed; bottom:0; left:0; right:0;
-  background:#1c2b33; border-radius:18px 18px 0 0;
-  padding:20px 16px 36px; z-index:91; display:none;
-  border-top:1px solid #2c3e4a;
-}
-.bottom-sheet.open { display:block; }
+  .user-item-info { flex: 1; min-width: 0; }
 
-.sheet-title { font-size:13px; color:#8a9ba8; text-align:center; margin-bottom:18px; }
-.sheet-btn {
-  width:100%; padding:14px; border:none; border-radius:10px;
-  font-size:16px; font-weight:600; cursor:pointer; margin-bottom:10px; display:block;
-}
-.sheet-btn.danger { background:#e74c3c; color:#fff; }
-.sheet-btn.cancel { background:#2c3e4a; color:#e8f4f8; }
+  .user-item-phone {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
 
-.hidden { display:none !important; }
+  .user-item-phone.has-unread { color: var(--unread); }
+
+  .user-item-preview {
+    font-size: 12px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .user-item-meta {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
+  }
+
+  .user-item-time {
+    font-size: 11px; color: var(--text-secondary);
+  }
+
+  .unread-badge {
+    background: var(--green);
+    color: #fff;
+    border-radius: 50%;
+    width: 20px; height: 20px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+  }
+
+  .no-users {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    height: 100%; color: var(--text-secondary);
+    text-align: center; padding: 40px 20px;
+  }
+
+  .no-users-icon { font-size: 48px; margin-bottom: 12px; }
+
+  /* Chat view (admin -> user) */
+  #chat-view {
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .chat-view-header {
+    background: var(--teal);
+    padding: 10px 12px;
+    display: flex; align-items: center; gap: 10px;
+    flex-shrink: 0; min-height: 52px;
+  }
+
+  .back-to-users {
+    background: none; border: none;
+    color: #fff; font-size: 22px; cursor: pointer; padding: 4px;
+    line-height: 1;
+  }
+
+  .chat-user-info { flex: 1; }
+
+  .chat-user-phone { font-size: 15px; font-weight: 600; color: #fff; }
+  .chat-user-sub { font-size: 11px; color: rgba(255,255,255,0.7); }
+
+  .delete-user-btn {
+    background: rgba(229,57,53,0.25);
+    border: 1px solid rgba(229,57,53,0.5);
+    color: #ff6b6b; padding: 6px 10px;
+    border-radius: 14px; font-size: 12px;
+    cursor: pointer; font-weight: 600;
+  }
+
+  .admin-messages {
+    flex: 1; overflow-y: auto; overflow-x: hidden;
+    padding: 10px 10px 6px;
+    background: var(--bg);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-messages::-webkit-scrollbar { width: 3px; }
+  .admin-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* Message bubbles (same as user) */
+  .msg-row { display: flex; margin-bottom: 2px; padding: 1px 0; }
+  .msg-row.sent { justify-content: flex-end; }
+  .msg-row.received { justify-content: flex-start; }
+
+  .msg-bubble {
+    max-width: 75%; padding: 7px 10px 4px;
+    border-radius: 8px; position: relative;
+    word-wrap: break-word; min-width: 60px;
+  }
+
+  .msg-row.sent .msg-bubble {
+    background: var(--sent-bg); border-bottom-right-radius: 2px;
+  }
+
+  .msg-row.received .msg-bubble {
+    background: var(--received-bg); border-bottom-left-radius: 2px;
+  }
+
+  .msg-text { font-size: 15px; line-height: 1.4; color: var(--text-primary); }
+  .msg-unsent { font-size: 13px; color: var(--text-secondary); font-style: italic; }
+
+  .msg-meta {
+    display: flex; align-items: center; justify-content: flex-end;
+    gap: 3px; margin-top: 2px;
+  }
+
+  .msg-time { font-size: 10px; color: var(--text-secondary); }
+  .msg-tick { font-size: 12px; color: var(--green); }
+
+  .date-divider { text-align: center; margin: 12px 0; }
+  .date-divider span {
+    background: var(--header-bg); color: var(--text-secondary);
+    font-size: 11px; padding: 4px 12px; border-radius: 10px;
+  }
+
+  /* Admin input */
+  .admin-input-area {
+    background: var(--header-bg);
+    border-top: 1px solid var(--border);
+    padding: 8px 10px; flex-shrink: 0; z-index: 10;
+  }
+
+  .input-row {
+    display: flex; align-items: flex-end; gap: 8px;
+  }
+
+  .msg-input-wrap {
+    flex: 1; background: var(--input-bg);
+    border-radius: 22px; padding: 8px 14px;
+    border: 1px solid var(--border);
+    display: flex; align-items: flex-end; min-height: 44px;
+  }
+
+  #admin-msg-input {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: var(--text-primary); font-size: 15px;
+    line-height: 1.4; resize: none;
+    max-height: 100px; min-height: 22px;
+    font-family: inherit; overflow-y: auto;
+  }
+
+  #admin-msg-input::placeholder { color: var(--text-secondary); }
+
+  .send-btn {
+    width: 44px; height: 44px;
+    background: var(--green); border: none;
+    border-radius: 50%; color: #fff; font-size: 20px;
+    cursor: pointer; display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0;
+  }
+
+  .send-btn:active { opacity: 0.85; }
+
+  /* Context menu */
+  .ctx-menu {
+    position: fixed;
+    background: var(--header-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px; padding: 4px 0;
+    z-index: 999; min-width: 150px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+
+  .ctx-item {
+    padding: 12px 18px; font-size: 14px;
+    cursor: pointer; color: var(--text-primary);
+  }
+
+  .ctx-item:hover { background: var(--input-bg); }
+  .ctx-item.danger { color: var(--red); }
+
+  /* Long press delete overlay for users */
+  .delete-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 990; background: transparent;
+  }
+
+  /* Loading */
+  .loading-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex; align-items: center; justify-content: center; z-index: 9999;
+  }
+
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--green);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .toast {
+    position: fixed; bottom: 80px; left: 50%;
+    transform: translateX(-50%);
+    background: #333; color: #fff;
+    padding: 10px 18px; border-radius: 20px;
+    font-size: 13px; z-index: 999;
+    opacity: 0; transition: opacity 0.3s;
+    pointer-events: none; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; }
+
+  .empty-msgs {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    height: 100%; color: var(--text-secondary);
+    text-align: center; padding: 20px;
+  }
+  .empty-msgs-icon { font-size: 40px; margin-bottom: 10px; }
 </style>
 </head>
 <body>
 
-<!-- LOADING -->
-<div id="loading-overlay">
-  <div class="loader"></div>
-  <span style="color:#8a9ba8;font-size:14px">Loading…</span>
-</div>
-
 <!-- ADMIN LOGIN -->
-<div id="admin-login" class="hidden">
+<div id="admin-login">
   <div class="admin-logo">🛡️</div>
-  <div class="admin-title">Admin Panel</div>
-  <div class="admin-sub">ChatApp Administration</div>
-  <div class="auth-card">
-    <h2>Admin Login</h2>
-    <div class="input-group">
-      <label>Username</label>
-      <input type="text" id="admin-user" placeholder="Enter username" autocomplete="username">
-    </div>
-    <div class="input-group">
-      <label>Password</label>
-      <div class="pw-wrap">
-        <input type="password" id="admin-pw" placeholder="Enter password" autocomplete="current-password">
-        <button class="eye-btn" onclick="toggleEye('admin-pw',this)">👁️</button>
+  <div class="admin-login-title">Admin Panel</div>
+  <div class="admin-login-sub">Chat Management</div>
+  <div class="admin-form">
+    <div class="a-login-error" id="a-login-error"></div>
+    <div class="a-form-group">
+      <label class="a-form-label">Username</label>
+      <div class="a-input-wrap">
+        <input type="text" class="a-form-input" id="a-username" placeholder="Enter username" autocomplete="username">
       </div>
     </div>
-    <div class="msg-err" id="admin-err"></div>
-    <button class="btn-primary" onclick="doAdminLogin()">Login</button>
+    <div class="a-form-group">
+      <label class="a-form-label">Password</label>
+      <div class="a-input-wrap">
+        <input type="password" class="a-form-input" id="a-password" placeholder="Enter password" autocomplete="current-password">
+        <button class="a-eye-btn" onclick="toggleAEye()">👁️</button>
+      </div>
+    </div>
+    <button class="a-login-btn" onclick="adminLogin()">Log In as Admin</button>
   </div>
 </div>
 
-<!-- ADMIN PANEL -->
-<div id="admin-panel">
+<!-- ADMIN MAIN -->
+<div id="admin-main">
 
-  <!-- ① USERS LIST VIEW -->
+  <!-- Header -->
+  <div class="admin-header">
+    <div>
+      <div class="admin-header-title">💬 Admin Panel</div>
+      <div class="admin-header-sub">Kibet Davis</div>
+    </div>
+    <button class="admin-logout-btn" onclick="adminLogout()">Logout</button>
+  </div>
+
+  <!-- USERS VIEW -->
   <div id="users-view">
-    <div class="top-bar">
-      <div class="top-bar-title">💬 All Chats</div>
-      <div class="top-bar-right">
-        <a class="btn-wa"
-           href="https://wa.me/254734081951?text=Hello!%20I'd%20like%20this%20Programme."
-           target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94
-            1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198
-            0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077
-            4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421
-            7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0
-            01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893
-            6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157
-            11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0
-            11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-          </svg>
-          WhatsApp
-        </a>
-        <button class="btn-logout" onclick="adminLogout()">Logout</button>
-      </div>
+    <div class="users-search">
+      <input type="text" placeholder="🔍  Search users..." id="user-search" oninput="filterUsers()">
     </div>
-    <div class="hint-text">Long press a user to delete their account</div>
-    <div id="users-list">
-      <div class="spinner" id="users-spinner">Loading users…</div>
+    <div class="users-list" id="users-list">
+      <div class="no-users">
+        <div class="no-users-icon">👥</div>
+        <p>No users yet.<br>Users will appear here when they sign up.</p>
+      </div>
     </div>
   </div>
 
-  <!-- ② SINGLE CHAT VIEW -->
+  <!-- CHAT VIEW -->
   <div id="chat-view">
-    <div class="top-bar">
-      <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
-        <button class="btn-back" onclick="backToUsers()">&#8592;</button>
-        <div class="cv-avatar" id="cv-avatar">U</div>
-        <div style="min-width:0;">
-          <div class="chat-user-phone"  id="cv-phone">…</div>
-          <div class="chat-user-status">Tap ← to go back</div>
-        </div>
+    <div class="chat-view-header">
+      <button class="back-to-users" onclick="backToUsers()">&#8592;</button>
+      <div class="chat-user-info">
+        <div class="chat-user-phone" id="cv-phone">User</div>
+        <div class="chat-user-sub" id="cv-sub">Chat</div>
       </div>
-      <div class="top-bar-right">
-        <a class="btn-wa"
-           href="https://wa.me/254734081951?text=Hello!%20I'd%20like%20this%20Programme."
-           target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94
-            1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198
-            0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077
-            4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421
-            7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0
-            01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893
-            6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157
-            11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0
-            11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-          </svg>
-          WhatsApp
-        </a>
-        <button class="btn-logout" onclick="adminLogout()">Logout</button>
+      <button class="delete-user-btn" onclick="confirmDeleteUser()">🗑️ Delete</button>
+    </div>
+
+    <div class="admin-messages" id="admin-messages">
+      <div class="empty-msgs">
+        <div class="empty-msgs-icon">💬</div>
+        <p>No messages yet</p>
       </div>
     </div>
 
-    <div id="admin-messages">
-      <div class="spinner" id="admin-msg-spinner">Loading messages…</div>
-    </div>
-
-    <div class="chat-bottom">
+    <div class="admin-input-area">
       <div class="input-row">
-        <textarea id="admin-input" placeholder="Type a message to this user…" rows="1"
-          oninput="adminResize(this)" onkeydown="adminKeyDown(event)"></textarea>
-        <button id="admin-send-btn" onclick="adminSend()">
-          <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-        </button>
+        <div class="msg-input-wrap">
+          <textarea id="admin-msg-input" placeholder="Type a message..." rows="1"
+            oninput="adminAutoResize(this)"
+            onkeydown="adminHandleKey(event)"></textarea>
+        </div>
+        <button class="send-btn" onclick="adminSendMessage()">&#10148;</button>
       </div>
     </div>
   </div>
 
-</div><!-- end admin-panel -->
-
-<!-- USER DELETE SHEET -->
-<div class="sheet-overlay" id="user-sheet-overlay" onclick="closeUserSheet()"></div>
-<div class="bottom-sheet"  id="user-sheet">
-  <div class="sheet-title" id="user-sheet-title">User options</div>
-  <button class="sheet-btn danger" onclick="confirmDeleteUser()">🗑️ Delete User &amp; All Chats</button>
-  <button class="sheet-btn cancel" onclick="closeUserSheet()">Cancel</button>
 </div>
 
-<!-- MESSAGE UNSEND SHEET -->
-<div class="sheet-overlay" id="msg-sheet-overlay" onclick="closeMsgSheet()"></div>
-<div class="bottom-sheet"  id="msg-sheet">
-  <div class="sheet-title">Message options</div>
-  <button class="sheet-btn danger" onclick="doAdminUnsend()">↩️ Unsend this message</button>
-  <button class="sheet-btn cancel" onclick="closeMsgSheet()">Cancel</button>
+<!-- Context menu -->
+<div class="ctx-menu" id="ctx-menu" style="display:none;">
+  <div class="ctx-item danger" onclick="adminUnsendMsg()">🚫 Unsend Message</div>
+  <div class="ctx-item" onclick="closeCtxMenu()">Cancel</div>
+</div>
+<div class="delete-overlay" id="ctx-overlay" style="display:none;" onclick="closeCtxMenu()"></div>
+
+<!-- Loading -->
+<div class="loading-overlay" id="a-loading" style="display:none;">
+  <div class="spinner"></div>
 </div>
 
-<!-- FIREBASE -->
+<div class="toast" id="a-toast"></div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
-  getFirestore, collection, doc,
-  addDoc, setDoc, getDoc, getDocs,
-  onSnapshot, query, orderBy,
-  serverTimestamp, updateDoc,
-  deleteDoc, writeBatch
+  getFirestore, collection, doc, setDoc, addDoc, getDoc, getDocs,
+  onSnapshot, query, orderBy, serverTimestamp, updateDoc, deleteDoc,
+  writeBatch, where
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  getAuth, deleteUser as fbDeleteUser, signInWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-/* ── Firebase config ── */
-const app = initializeApp({
-  apiKey:            "AIzaSyDh2fHMUbysckAxdIA8dcz8sHWrcLbW1EQ",
-  authDomain:        "african-enterprise-challenge-f.firebaseapp.com",
-  projectId:         "african-enterprise-challenge-f",
-  storageBucket:     "african-enterprise-challenge-f.firebasestorage.app",
+const firebaseConfig = {
+  apiKey: "AIzaSyDh2fHMUbysckAxdIA8dcz8sHWrcLbW1EQ",
+  authDomain: "african-enterprise-challenge-f.firebaseapp.com",
+  projectId: "african-enterprise-challenge-f",
+  storageBucket: "african-enterprise-challenge-f.firebasestorage.app",
   messagingSenderId: "85146331644",
-  appId:             "1:85146331644:web:b28599e0c8b75498fe6a79",
-  measurementId:     "G-6C670QY54S"
-});
-const db = getFirestore(app);
-
-/* ── Admin credentials ── */
-const ADMIN_USER = 'Kibet Davis';
-const ADMIN_PASS = 'Kwenik254$';
-
-/* ── State ── */
-let currentChatPhone = null;
-let unsubMessages    = null;
-let unsubUsers       = null;
-let selectedUser     = null;
-let selectedMsgId    = null;
-let lpTimer          = null;  // long-press timer
-
-/* ── Eye toggle ── */
-window.toggleEye = function(id, btn) {
-  const inp = document.getElementById(id);
-  inp.type = inp.type === 'password' ? 'text' : 'password';
-  btn.textContent = inp.type === 'password' ? '👁️' : '🙈';
+  appId: "1:85146331644:web:b28599e0c8b75498fe6a79",
+  measurementId: "G-6C670QY54S"
 };
 
-/* ── Admin login ── */
-window.doAdminLogin = function() {
-  const u = document.getElementById('admin-user').value.trim();
-  const p = document.getElementById('admin-pw').value;
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// Admin credentials
+const ADMIN_USER = 'Kibet Davis';
+const ADMIN_PASS = 'Kwenik254$';
+const ADMIN_STORE_KEY = 'admin_logged_in';
+
+let allUsers = [];
+let filteredUsers = [];
+let currentChatUserId = null;
+let currentChatUserPhone = null;
+let chatUnsub = null;
+let usersUnsub = null;
+let selectedMsgId = null;
+let lastDateShown = null;
+
+// ===== CHECK ADMIN SESSION =====
+if (localStorage.getItem(ADMIN_STORE_KEY) === 'true') {
+  showAdminMain();
+}
+
+// ===== ADMIN LOGIN =====
+window.adminLogin = function() {
+  const u = document.getElementById('a-username').value.trim();
+  const p = document.getElementById('a-password').value;
+  const err = document.getElementById('a-login-error');
+  err.style.display = 'none';
+
   if (u === ADMIN_USER && p === ADMIN_PASS) {
-    localStorage.setItem('admin_session','1');
-    document.getElementById('admin-login').classList.add('hidden');
-    const panel = document.getElementById('admin-panel');
-    panel.style.display = 'flex'; panel.style.flexDirection = 'column';
-    startUsersListener();
+    localStorage.setItem(ADMIN_STORE_KEY, 'true');
+    showAdminMain();
   } else {
-    document.getElementById('admin-err').textContent = 'Wrong username or password.';
+    err.textContent = 'Incorrect username or password.';
+    err.style.display = 'block';
   }
 };
 
 window.adminLogout = function() {
   if (!confirm('Log out of admin panel?')) return;
-  localStorage.removeItem('admin_session');
-  if (unsubUsers)    unsubUsers();
-  if (unsubMessages) unsubMessages();
-  document.getElementById('admin-panel').style.display = 'none';
-  document.getElementById('admin-login').classList.remove('hidden');
-  document.getElementById('admin-user').value = '';
-  document.getElementById('admin-pw').value   = '';
-  document.getElementById('admin-err').textContent = '';
+  localStorage.removeItem(ADMIN_STORE_KEY);
+  if (usersUnsub) usersUnsub();
+  if (chatUnsub) chatUnsub();
+  document.getElementById('admin-main').style.display = 'none';
+  document.getElementById('admin-login').style.display = 'flex';
 };
 
-/* ══════════════════════════
-   USERS LIST
-══════════════════════════ */
-function startUsersListener() {
-  document.getElementById('users-spinner').style.display = 'block';
-  if (unsubUsers) unsubUsers();
+window.toggleAEye = function() {
+  const inp = document.getElementById('a-password');
+  const btn = document.querySelector('.a-eye-btn');
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+  else { inp.type = 'password'; btn.textContent = '👁️'; }
+};
 
-  unsubUsers = onSnapshot(collection(db,'chats'), snap => {
-    document.getElementById('users-spinner').style.display = 'none';
-    const list = document.getElementById('users-list');
-    list.innerHTML = '';
+function showAdminMain() {
+  document.getElementById('admin-login').style.display = 'none';
+  const m = document.getElementById('admin-main');
+  m.style.display = 'flex';
+  m.style.flexDirection = 'column';
+  loadUsers();
+}
 
-    /* sort most-recent first */
-    const docs = snap.docs
-      .filter(d => d.data().phone)
-      .sort((a,b) => {
-        const ta = a.data().lastTime?.toMillis?.() ?? 0;
-        const tb = b.data().lastTime?.toMillis?.() ?? 0;
-        return tb - ta;
-      });
-
-    if (!docs.length) {
-      list.innerHTML = '<div class="empty-msg">No users yet</div>';
-      return;
-    }
-
-    docs.forEach(d => {
-      const data    = d.data();
-      const phone   = data.phone || d.id;
-      const lastMsg = data.lastMsg || '';
-      const unread  = !!data.unread;
-      const dt      = data.lastTime?.toDate?.();
-      const timeStr = dt
-        ? dt.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})
-        : '';
-      const initials = phone.replace(/\D/g,'').slice(-2) || 'U';
-
-      const item = document.createElement('div');
-      item.className = 'user-item';
-      item.innerHTML = `
-        <div class="ui-avatar">${initials}</div>
-        <div class="ui-info">
-          <div class="ui-name ${unread?'unread':''}">${phone}</div>
-          <div class="ui-last">${lastMsg ? lastMsg.substring(0,55) : 'No messages yet'}</div>
-        </div>
-        <div class="ui-meta">
-          <div class="ui-time">${timeStr}</div>
-          <div class="ui-dot ${unread?'show':''}"></div>
-        </div>`;
-
-      /* tap → open chat */
-      item.addEventListener('click', () => openChat(phone));
-
-      /* long press → delete sheet */
-      const startLP = () => { lpTimer = setTimeout(() => openUserSheet(phone), 700); };
-      const clearLP = () => clearTimeout(lpTimer);
-      item.addEventListener('touchstart', startLP, {passive:true});
-      item.addEventListener('touchend',   clearLP);
-      item.addEventListener('touchmove',  clearLP);
-      item.addEventListener('mousedown',  startLP);
-      item.addEventListener('mouseup',    clearLP);
-      item.addEventListener('mouseleave', clearLP);
-
-      list.appendChild(item);
+// ===== LOAD USERS (real-time) =====
+function loadUsers() {
+  showALoading(true);
+  const chatsRef = collection(db, 'chats');
+  
+  if (usersUnsub) usersUnsub();
+  
+  usersUnsub = onSnapshot(chatsRef, (snapshot) => {
+    showALoading(false);
+    allUsers = [];
+    snapshot.forEach(d => {
+      allUsers.push({ id: d.id, ...d.data() });
     });
+    // Sort by lastTime desc (most recent first)
+    allUsers.sort((a, b) => {
+      const ta = a.lastTime?.toMillis?.() || 0;
+      const tb = b.lastTime?.toMillis?.() || 0;
+      return tb - ta;
+    });
+    filteredUsers = [...allUsers];
+    renderUsersList();
   });
 }
 
-/* ══════════════════════════
-   USER-DELETE SHEET
-══════════════════════════ */
-function openUserSheet(phone) {
-  selectedUser = phone;
-  document.getElementById('user-sheet-title').textContent = `Delete user: ${phone}`;
-  document.getElementById('user-sheet-overlay').classList.add('open');
-  document.getElementById('user-sheet').classList.add('open');
-}
-window.closeUserSheet = function() {
-  document.getElementById('user-sheet-overlay').classList.remove('open');
-  document.getElementById('user-sheet').classList.remove('open');
-  selectedUser = null;
-};
-window.confirmDeleteUser = async function() {
-  if (!selectedUser) { closeUserSheet(); return; }
-  const phone = selectedUser;
-  closeUserSheet();
-  if (!confirm(`Permanently delete user ${phone} and all their messages?`)) return;
-  try {
-    /* delete all messages in sub-collection */
-    const msgs  = await getDocs(collection(db,'chats',phone,'messages'));
-    const batch = writeBatch(db);
-    msgs.forEach(m => batch.delete(m.ref));
-    await batch.commit();
-    /* delete chat doc + user doc */
-    await deleteDoc(doc(db,'chats',phone));
-    await deleteDoc(doc(db,'users',phone));
-  } catch(e) {
-    console.error(e);
-    alert('Error deleting user. Try again.');
-  }
-};
-
-/* ══════════════════════════
-   OPEN CHAT
-══════════════════════════ */
-function openChat(phone) {
-  currentChatPhone = phone;
-
-  /* switch views */
-  document.getElementById('users-view').style.display = 'none';
-  const cv = document.getElementById('chat-view');
-  cv.style.display = 'flex'; cv.style.flexDirection = 'column';
-
-  document.getElementById('cv-phone').textContent  = phone;
-  document.getElementById('cv-avatar').textContent = phone.replace(/\D/g,'').slice(-2) || 'U';
-
-  /* mark read */
-  updateDoc(doc(db,'chats',phone), {unread:false}).catch(()=>{});
-
-  listenAdminMessages(phone);
-  setTimeout(() => document.getElementById('admin-input').focus(), 300);
-}
-
-window.backToUsers = function() {
-  if (unsubMessages) { unsubMessages(); unsubMessages = null; }
-  currentChatPhone = null;
-  document.getElementById('chat-view').style.display  = 'none';
-  const uv = document.getElementById('users-view');
-  uv.style.display = 'flex'; uv.style.flexDirection = 'column';
-};
-
-/* ══════════════════════════
-   MESSAGES LISTENER
-══════════════════════════ */
-function listenAdminMessages(phone) {
-  if (unsubMessages) unsubMessages();
-  document.getElementById('admin-msg-spinner').style.display = 'block';
-  const q = query(
-    collection(db,'chats',phone,'messages'),
-    orderBy('timestamp','asc')
-  );
-  unsubMessages = onSnapshot(q, snap => {
-    document.getElementById('admin-msg-spinner').style.display = 'none';
-    renderAdminMessages(snap.docs);
-  });
-}
-
-let lastAdminDate = '';
-function renderAdminMessages(docs) {
-  const area     = document.getElementById('admin-messages');
-  const atBottom = area.scrollHeight - area.scrollTop - area.clientHeight < 80;
-  area.innerHTML = '';
-  lastAdminDate  = '';
-
-  if (!docs.length) {
-    area.innerHTML = '<div class="empty-msg">No messages yet — send the first one!</div>';
+function renderUsersList() {
+  const list = document.getElementById('users-list');
+  if (filteredUsers.length === 0) {
+    list.innerHTML = `<div class="no-users">
+      <div class="no-users-icon">👥</div>
+      <p>No users yet.</p>
+    </div>`;
     return;
   }
 
-  docs.forEach(d => {
-    const data = d.data();
+  list.innerHTML = '';
+  filteredUsers.forEach(u => {
+    const phone = u.phone || u.id;
+    const initials = phone.slice(-2);
+    const hasUnread = u.unread === true;
+    const lastMsg = u.lastMessage || 'No messages';
+    const lastTime = u.lastTime ? formatTime(u.lastTime.toDate()) : '';
 
-    /* skip fully-hidden admin-unsent messages */
-    if (data.adminUnsent) return;
+    const item = document.createElement('div');
+    item.className = 'user-item';
+    item.dataset.uid = u.id;
+    item.innerHTML = `
+      <div class="user-item-avatar">${initials}</div>
+      <div class="user-item-info">
+        <div class="user-item-phone ${hasUnread ? 'has-unread' : ''}">${phone}</div>
+        <div class="user-item-preview">${escHtml(lastMsg)}</div>
+      </div>
+      <div class="user-item-meta">
+        <div class="user-item-time">${lastTime}</div>
+        ${hasUnread ? '<div class="unread-badge">●</div>' : ''}
+      </div>`;
 
-    /* day divider */
-    if (data.timestamp) {
-      const dt = data.timestamp.toDate ? data.timestamp.toDate() : new Date(data.timestamp);
-      const ds = dt.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'});
-      if (ds !== lastAdminDate) {
-        lastAdminDate = ds;
-        const div = document.createElement('div');
-        div.className = 'day-divider';
-        div.innerHTML = `<span>${ds}</span>`;
-        area.appendChild(div);
-      }
-    }
+    // Tap to open chat
+    item.addEventListener('click', () => openUserChat(u.id, phone));
 
-    const isAdmin = data.sender === 'admin';
-    const unsent  = data.unsent;   /* user-unsent — visible to admin */
-
-    const wrap   = document.createElement('div');
-    wrap.className = `msg-bubble-wrap ${isAdmin ? 'sent' : 'received'}`;
-
-    const bubble = document.createElement('div');
-    bubble.className = 'msg-bubble' + (unsent ? ' msg-unsent-bubble' : '');
-
-    if (unsent) {
-      bubble.textContent = 'User unsent this message';
-      bubble.classList.add('msg-unsent-text');
-    } else {
-      bubble.textContent = data.text || '';
-    }
-
-    /* time + sender label */
-    const meta = document.createElement('div');
-    meta.className = 'msg-meta';
-    let timeStr = '';
-    if (data.timestamp) {
-      const dt = data.timestamp.toDate ? data.timestamp.toDate() : new Date(data.timestamp);
-      timeStr = dt.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-    }
-    meta.textContent = `${isAdmin ? '✓ You' : '👤 User'} · ${timeStr}`;
-
-    /* long-press / double-tap on admin messages to unsend */
-    if (isAdmin && !unsent) {
-      bubble.style.cursor = 'pointer';
-      let lpt;
-      const startLP = () => { lpt = setTimeout(() => openMsgSheet(d.id), 600); };
-      const clearLP = () => clearTimeout(lpt);
-      bubble.addEventListener('touchstart', startLP,  {passive:true});
-      bubble.addEventListener('touchend',   clearLP);
-      bubble.addEventListener('touchmove',  clearLP);
-      bubble.addEventListener('mousedown',  startLP);
-      bubble.addEventListener('mouseup',    clearLP);
-      bubble.addEventListener('mouseleave', clearLP);
-      bubble.addEventListener('dblclick',   () => openMsgSheet(d.id));
-    }
-
-    wrap.appendChild(bubble);
-    wrap.appendChild(meta);
-    area.appendChild(wrap);
-  });
-
-  if (atBottom) area.scrollTop = area.scrollHeight;
-}
-
-/* ══════════════════════════
-   ADMIN SEND
-══════════════════════════ */
-window.adminSend = async function() {
-  const inp  = document.getElementById('admin-input');
-  const text = inp.value.trim();
-  if (!text || !currentChatPhone) return;
-  inp.value = ''; inp.style.height = '';
-  try {
-    await addDoc(collection(db,'chats',currentChatPhone,'messages'), {
-      text, sender:'admin',
-      timestamp:serverTimestamp(),
-      unsent:false, adminUnsent:false
+    // Long press to delete
+    let pressTimer;
+    item.addEventListener('touchstart', () => {
+      pressTimer = setTimeout(() => {
+        if (confirm(`Delete user ${phone}? This will erase all their data.`)) {
+          deleteUserData(u.id, u.uid);
+        }
+      }, 700);
     });
-    await setDoc(doc(db,'chats',currentChatPhone), {
-      phone:currentChatPhone,
-      lastMsg:`(Admin) ${text}`,
-      lastTime:serverTimestamp(),
-      unread:false
-    }, {merge:true});
-  } catch(e) { console.error(e); }
-};
+    item.addEventListener('touchend', () => clearTimeout(pressTimer));
+    item.addEventListener('touchmove', () => clearTimeout(pressTimer));
 
-window.adminKeyDown = function(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); adminSend(); }
-};
-window.adminResize = function(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-};
-
-/* ══════════════════════════
-   ADMIN UNSEND
-══════════════════════════ */
-function openMsgSheet(msgId) {
-  selectedMsgId = msgId;
-  document.getElementById('msg-sheet-overlay').classList.add('open');
-  document.getElementById('msg-sheet').classList.add('open');
+    list.appendChild(item);
+  });
 }
-window.closeMsgSheet = function() {
-  document.getElementById('msg-sheet-overlay').classList.remove('open');
-  document.getElementById('msg-sheet').classList.remove('open');
+
+window.filterUsers = function() {
+  const q = document.getElementById('user-search').value.toLowerCase();
+  filteredUsers = allUsers.filter(u => (u.phone || u.id).toLowerCase().includes(q));
+  renderUsersList();
+};
+
+// ===== OPEN USER CHAT =====
+function openUserChat(uid, phone) {
+  currentChatUserId = uid;
+  currentChatUserPhone = phone;
+
+  document.getElementById('cv-phone').textContent = phone;
+  document.getElementById('cv-sub').textContent = 'Chat with user';
+
+  document.getElementById('users-view').style.display = 'none';
+  const cv = document.getElementById('chat-view');
+  cv.style.display = 'flex';
+  cv.style.flexDirection = 'column';
+
+  // Mark as read
+  updateDoc(doc(db, 'chats', uid), { unread: false }).catch(() => {});
+
+  loadAdminMessages(uid);
+
+  setTimeout(() => {
+    document.getElementById('admin-msg-input').focus();
+  }, 300);
+}
+
+window.backToUsers = function() {
+  if (chatUnsub) chatUnsub();
+  document.getElementById('chat-view').style.display = 'none';
+  document.getElementById('users-view').style.display = 'flex';
+  document.getElementById('users-view').style.flexDirection = 'column';
+  currentChatUserId = null;
+};
+
+// ===== LOAD MESSAGES =====
+function loadAdminMessages(uid) {
+  const q = query(
+    collection(db, 'chats', uid, 'messages'),
+    orderBy('timestamp', 'asc')
+  );
+
+  if (chatUnsub) chatUnsub();
+  lastDateShown = null;
+
+  chatUnsub = onSnapshot(q, (snapshot) => {
+    const container = document.getElementById('admin-messages');
+    container.innerHTML = '';
+    lastDateShown = null;
+
+    if (snapshot.empty) {
+      container.innerHTML = `<div class="empty-msgs">
+        <div class="empty-msgs-icon">💬</div><p>No messages yet</p></div>`;
+      return;
+    }
+
+    snapshot.forEach(docSnap => {
+      const msg = { id: docSnap.id, ...docSnap.data() };
+      renderAdminMessage(msg, container);
+    });
+
+    container.scrollTop = container.scrollHeight;
+  });
+}
+
+function renderAdminMessage(msg, container) {
+  // Date divider
+  if (msg.timestamp) {
+    const date = msg.timestamp.toDate();
+    const dateStr = formatDate(date);
+    if (dateStr !== lastDateShown) {
+      lastDateShown = dateStr;
+      const div = document.createElement('div');
+      div.className = 'date-divider';
+      div.innerHTML = `<span>${dateStr}</span>`;
+      container.appendChild(div);
+    }
+  }
+
+  const isFromUser = msg.sender === 'user'; // received by admin
+  const isAdminMsg = msg.sender === 'admin'; // sent by admin
+
+  // If admin unsent - show blank (skip rendering)
+  if (msg.unsent && msg.unsentBy === 'admin') return;
+
+  // If user unsent - show as unsent note
+  const isUserUnsent = msg.unsent && msg.unsentBy === 'user';
+
+  const row = document.createElement('div');
+  row.className = `msg-row ${isAdminMsg ? 'sent' : 'received'}`;
+  row.dataset.msgId = msg.id;
+
+  const time = msg.timestamp ? formatTime(msg.timestamp.toDate()) : '';
+  let content = isUserUnsent
+    ? `<div class="msg-text msg-unsent">🚫 User unsent this</div>`
+    : `<div class="msg-text">${escHtml(msg.text || '')}</div>`;
+
+  row.innerHTML = `
+    <div class="msg-bubble">
+      ${content}
+      <div class="msg-meta">
+        <span class="msg-time">${time}</span>
+        ${isAdminMsg ? '<span class="msg-tick">✓✓</span>' : ''}
+      </div>
+    </div>`;
+
+  // Double tap to unsend (admin only, non-unsent messages)
+  if (!isUserUnsent && !msg.unsent) {
+    let lastTap = 0;
+    row.addEventListener('touchend', (e) => {
+      const now = Date.now();
+      if (now - lastTap < 350) {
+        e.preventDefault();
+        selectedMsgId = msg.id;
+        showCtxMenu(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+      }
+      lastTap = now;
+    });
+
+    // Desktop double click
+    row.addEventListener('dblclick', (e) => {
+      selectedMsgId = msg.id;
+      showCtxMenu(e.clientX, e.clientY);
+    });
+  }
+
+  container.appendChild(row);
+}
+
+// ===== CONTEXT MENU (unsend) =====
+function showCtxMenu(x, y) {
+  const menu = document.getElementById('ctx-menu');
+  const overlay = document.getElementById('ctx-overlay');
+  menu.style.display = 'block';
+  overlay.style.display = 'block';
+
+  // Position menu
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const mw = 160, mh = 90;
+  let left = x, top = y;
+  if (left + mw > vw) left = vw - mw - 10;
+  if (top + mh > vh) top = vh - mh - 10;
+  menu.style.left = left + 'px';
+  menu.style.top = top + 'px';
+}
+
+window.closeCtxMenu = function() {
+  document.getElementById('ctx-menu').style.display = 'none';
+  document.getElementById('ctx-overlay').style.display = 'none';
   selectedMsgId = null;
 };
-window.doAdminUnsend = async function() {
-  if (!selectedMsgId || !currentChatPhone) { closeMsgSheet(); return; }
+
+window.adminUnsendMsg = async function() {
+  if (!selectedMsgId || !currentChatUserId) { closeCtxMenu(); return; }
+  closeCtxMenu();
   try {
     await updateDoc(
-      doc(db,'chats',currentChatPhone,'messages',selectedMsgId),
-      { adminUnsent:true, text:'' }
+      doc(db, 'chats', currentChatUserId, 'messages', selectedMsgId),
+      { unsent: true, unsentBy: 'admin', text: '' }
     );
-  } catch(e) { console.error(e); }
-  closeMsgSheet();
+    showAToast('Message unsent');
+  } catch (e) {
+    showAToast('Failed to unsend');
+  }
 };
 
-/* ══════════════════════════
-   INIT
-══════════════════════════ */
-async function init() {
-  await new Promise(r => setTimeout(r, 700));
-  document.getElementById('loading-overlay').style.display = 'none';
-  if (localStorage.getItem('admin_session') === '1') {
-    const panel = document.getElementById('admin-panel');
-    panel.style.display = 'flex'; panel.style.flexDirection = 'column';
-    startUsersListener();
-  } else {
-    document.getElementById('admin-login').classList.remove('hidden');
+// ===== SEND MESSAGE (admin to user) =====
+window.adminSendMessage = async function() {
+  const input = document.getElementById('admin-msg-input');
+  const text = input.value.trim();
+  if (!text || !currentChatUserId) return;
+
+  input.value = '';
+  adminAutoResize(input);
+
+  try {
+    await setDoc(doc(db, 'chats', currentChatUserId), {
+      lastMessage: '(Admin) ' + text,
+      lastTime: serverTimestamp(),
+      unread: false
+    }, { merge: true });
+
+    await addDoc(collection(db, 'chats', currentChatUserId, 'messages'), {
+      text: text,
+      sender: 'admin',
+      timestamp: serverTimestamp(),
+      unsent: false,
+      unsentBy: null
+    });
+  } catch (e) {
+    showAToast('Failed to send message');
+  }
+};
+
+// ===== DELETE USER =====
+window.confirmDeleteUser = function() {
+  if (!currentChatUserId) return;
+  if (confirm(`Delete user ${currentChatUserPhone}? All their chats will be erased.`)) {
+    deleteUserData(currentChatUserId, null);
+  }
+};
+
+async function deleteUserData(uid, authUid) {
+  showALoading(true);
+  try {
+    // Delete all messages
+    const msgs = await getDocs(collection(db, 'chats', uid, 'messages'));
+    const batch = writeBatch(db);
+    msgs.forEach(m => batch.delete(m.ref));
+    // Delete chat doc
+    batch.delete(doc(db, 'chats', uid));
+    // Delete user doc
+    batch.delete(doc(db, 'users', uid));
+    await batch.commit();
+
+    showALoading(false);
+    showAToast('User deleted');
+    backToUsers();
+  } catch (e) {
+    showALoading(false);
+    showAToast('Error deleting user: ' + e.message);
   }
 }
-init();
+
+// ===== HELPERS =====
+function formatTime(date) {
+  return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+}
+
+function formatDate(date) {
+  const today = new Date();
+  const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+  if (date.toDateString() === today.toDateString()) return 'Today';
+  if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
+  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function escHtml(text) {
+  return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+window.adminAutoResize = function(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+};
+
+window.adminHandleKey = function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    adminSendMessage();
+  }
+};
+
+function showALoading(v) {
+  document.getElementById('a-loading').style.display = v ? 'flex' : 'none';
+}
+
+function showAToast(msg) {
+  const t = document.getElementById('a-toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
 </script>
 </body>
 </html>
