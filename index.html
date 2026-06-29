@@ -3,338 +3,567 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Chat App</title>
+<title>ChatApp</title>
 <style>
-  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-  body{font-family:'Segoe UI',sans-serif;background:#111b21;color:#e9edef;height:100dvh;display:flex;flex-direction:column;overflow:hidden;max-width:480px;margin:0 auto;}
-  #authScreen{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:24px;background:#111b21;}
-  .auth-logo{font-size:48px;margin-bottom:12px;}
-  .auth-title{font-size:22px;font-weight:700;color:#00a884;margin-bottom:6px;}
-  .auth-sub{font-size:13px;color:#8696a0;margin-bottom:32px;text-align:center;}
-  .auth-card{background:#1f2c34;border-radius:16px;padding:24px;width:100%;max-width:360px;}
-  .auth-card h2{font-size:18px;color:#e9edef;margin-bottom:20px;text-align:center;}
-  .input-group{margin-bottom:16px;position:relative;}
-  .input-group label{display:block;font-size:12px;color:#8696a0;margin-bottom:6px;}
-  .input-group input{width:100%;background:#2a3942;border:1px solid #374045;border-radius:10px;padding:14px 48px 14px 14px;color:#e9edef;font-size:16px;outline:none;}
-  .input-group input:focus{border-color:#00a884;}
-  .input-group input::placeholder{color:#8696a0;}
-  .eye-btn{position:absolute;right:14px;top:38px;background:none;border:none;color:#8696a0;font-size:18px;cursor:pointer;padding:2px;}
-  .auth-btn{width:100%;background:#00a884;color:#fff;border:none;border-radius:10px;padding:15px;font-size:16px;font-weight:600;cursor:pointer;margin-top:8px;}
-  .auth-btn:active{background:#008f72;}
-  .auth-link{text-align:center;margin-top:16px;font-size:13px;color:#8696a0;}
-  .auth-link span{color:#00a884;cursor:pointer;font-weight:600;}
-  .auth-err{color:#f15c6d;font-size:12px;margin-top:8px;text-align:center;min-height:16px;}
-  #landingScreen{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:24px;background:#111b21;}
-  .land-logo{font-size:64px;margin-bottom:16px;}
-  .land-title{font-size:24px;font-weight:700;color:#00a884;margin-bottom:8px;}
-  .land-sub{font-size:14px;color:#8696a0;margin-bottom:40px;text-align:center;line-height:1.5;}
-  .land-btns{display:flex;flex-direction:column;gap:12px;width:100%;max-width:300px;}
-  .land-btn-primary{background:#00a884;color:#fff;border:none;border-radius:12px;padding:16px;font-size:16px;font-weight:600;cursor:pointer;}
-  .land-btn-secondary{background:#1f2c34;color:#e9edef;border:1px solid #374045;border-radius:12px;padding:16px;font-size:16px;font-weight:600;cursor:pointer;}
-  #chatScreen{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-  .top-bar{background:#1f2c34;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;min-height:56px;z-index:10;}
-  .top-left{display:flex;align-items:center;gap:10px;}
-  .user-avatar{width:36px;height:36px;border-radius:50%;background:#00a884;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0;}
-  .top-phone{font-size:14px;font-weight:600;color:#e9edef;}
-  .top-right{display:flex;align-items:center;gap:8px;}
-  .wa-btn{background:#25d366;color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;text-decoration:none;}
-  .logout-btn{background:#f15c6d;color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer;}
-  .messages-area{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:4px;background:#0b141a;}
-  .messages-area::-webkit-scrollbar{width:4px;}
-  .messages-area::-webkit-scrollbar-thumb{background:#374045;border-radius:4px;}
-  .msg-row{display:flex;margin-bottom:2px;}
-  .msg-row.sent{justify-content:flex-end;}
-  .msg-row.received{justify-content:flex-start;}
-  .msg-bubble{max-width:78%;padding:7px 12px 20px;border-radius:8px;position:relative;word-wrap:break-word;font-size:15px;line-height:1.4;cursor:pointer;}
-  .msg-row.sent .msg-bubble{background:#005c4b;border-radius:8px 0 8px 8px;color:#e9edef;}
-  .msg-row.received .msg-bubble{background:#1f2c34;border-radius:0 8px 8px 8px;color:#e9edef;}
-  .msg-bubble.unsent{background:transparent;border:1px dashed #374045;color:#8696a0;font-style:italic;padding:7px 12px;}
-  .msg-time{position:absolute;bottom:4px;right:10px;font-size:11px;color:#8696a0;}
-  .msg-tick{color:#53bdeb;font-size:11px;}
-  .date-divider{text-align:center;margin:10px 0;}
-  .date-divider span{background:#1f2c34;color:#8696a0;font-size:12px;padding:4px 12px;border-radius:20px;}
-  .input-area{background:#1f2c34;padding:8px 10px;display:flex;align-items:flex-end;gap:8px;flex-shrink:0;min-height:60px;}
-  .msg-input-wrap{flex:1;background:#2a3942;border-radius:24px;display:flex;align-items:flex-end;padding:8px 14px;gap:8px;min-height:46px;}
-  .clip-btn{background:none;border:none;color:#8696a0;font-size:22px;cursor:pointer;padding:0;flex-shrink:0;align-self:flex-end;margin-bottom:2px;}
-  .msg-input{flex:1;background:none;border:none;color:#e9edef;font-size:16px;outline:none;resize:none;max-height:120px;line-height:1.4;padding:0;font-family:'Segoe UI',sans-serif;}
-  .msg-input::placeholder{color:#8696a0;}
-  .send-btn{width:46px;height:46px;border-radius:50%;background:#00a884;border:none;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-  .send-btn:active{background:#008f72;}
-  .wa-chat-bar{background:#0b141a;padding:6px 12px;display:flex;justify-content:center;flex-shrink:0;}
-  .wa-chat-btn{background:#25d366;color:#fff;border:none;border-radius:20px;padding:8px 20px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;text-decoration:none;}
-  .hidden{display:none!important;}
-  .loading{text-align:center;padding:20px;color:#8696a0;font-size:14px;}
-  .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1f2c34;color:#e9edef;padding:10px 20px;border-radius:20px;font-size:13px;z-index:999;border:1px solid #374045;}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+body {
+  font-family:'Segoe UI',sans-serif;
+  background:#0b1014;
+  color:#fff;
+  height:100dvh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+/* ── LOADING ── */
+#loading-overlay {
+  position:fixed; inset:0; background:#0b1014;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:16px; z-index:999;
+}
+.loader {
+  width:36px; height:36px;
+  border:3px solid #2c3e4a; border-top-color:#25d366;
+  border-radius:50%; animation:spin .8s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* ── AUTH ── */
+#auth-screen {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  background:linear-gradient(160deg,#0b1014 0%,#1a2a35 100%);
+  padding:24px; overflow-y:auto;
+}
+.auth-logo  { font-size:48px; margin-bottom:8px; }
+.auth-title { font-size:26px; font-weight:700; color:#25d366; margin-bottom:4px; }
+.auth-sub   { font-size:13px; color:#8a9ba8; margin-bottom:32px; }
+
+.auth-card {
+  background:#1c2b33; border-radius:16px; padding:28px 24px;
+  width:100%; max-width:380px; box-shadow:0 8px 32px rgba(0,0,0,.5);
+}
+.auth-card h2 { font-size:18px; font-weight:600; margin-bottom:20px; color:#e8f4f8; }
+
+.input-group          { margin-bottom:16px; }
+.input-group label    { font-size:12px; color:#8a9ba8; display:block; margin-bottom:6px; font-weight:500; }
+.input-group input    {
+  width:100%; padding:14px 16px; background:#0d1f2b;
+  border:1.5px solid #2c3e4a; border-radius:10px;
+  color:#fff; font-size:16px; outline:none; transition:border-color .2s;
+}
+.input-group input:focus       { border-color:#25d366; }
+.input-group input::placeholder{ color:#4a6070; }
+
+.pw-wrap       { position:relative; }
+.pw-wrap input { padding-right:48px; }
+.eye-btn {
+  position:absolute; right:14px; top:50%; transform:translateY(-50%);
+  background:none; border:none; cursor:pointer; color:#8a9ba8; font-size:18px; padding:4px;
+}
+
+.btn-primary {
+  width:100%; padding:15px; background:#25d366; border:none;
+  border-radius:10px; color:#fff; font-size:16px; font-weight:700;
+  cursor:pointer; margin-top:8px; transition:background .2s,transform .1s;
+}
+.btn-primary:active { transform:scale(.98); background:#1da954; }
+
+.auth-switch   { text-align:center; margin-top:20px; font-size:14px; color:#8a9ba8; }
+.auth-switch a { color:#25d366; text-decoration:none; font-weight:600; cursor:pointer; }
+.msg-err       { font-size:13px; color:#ff6b6b; margin-top:10px; text-align:center; min-height:18px; }
+
+/* ── CHAT SCREEN ── */
+#chat-screen {
+  flex:1; display:none; flex-direction:column;
+  height:100dvh; overflow:hidden;
+}
+
+/* TOP BAR */
+.chat-topbar {
+  background:#1c2b33; padding:10px 14px;
+  display:flex; align-items:center; justify-content:space-between;
+  flex-shrink:0; border-bottom:1px solid #2c3e4a; min-height:56px;
+}
+.topbar-left { display:flex; align-items:center; gap:8px; }
+.user-avatar {
+  width:36px; height:36px; border-radius:50%; background:#25d366;
+  display:flex; align-items:center; justify-content:center;
+  font-size:15px; font-weight:700; color:#fff; flex-shrink:0;
+}
+.user-phone  { font-size:14px; font-weight:600; color:#e8f4f8; }
+.user-status { font-size:11px; color:#25d366; }
+
+.topbar-right { display:flex; align-items:center; gap:8px; }
+.btn-wa {
+  background:#25d366; border:none; border-radius:8px;
+  color:#fff; font-size:12px; font-weight:700; padding:7px 10px;
+  cursor:pointer; display:flex; align-items:center; gap:5px;
+  text-decoration:none; white-space:nowrap;
+}
+.btn-wa svg   { width:15px; height:15px; fill:#fff; flex-shrink:0; }
+.btn-logout {
+  background:#e74c3c; border:none; border-radius:8px;
+  color:#fff; font-size:12px; font-weight:700; padding:7px 10px;
+  cursor:pointer; white-space:nowrap;
+}
+
+/* MESSAGES AREA */
+#messages-area {
+  flex:1; overflow-y:auto; padding:12px 10px;
+  display:flex; flex-direction:column; gap:2px;
+  background:#0b1014; -webkit-overflow-scrolling:touch;
+}
+#messages-area::-webkit-scrollbar       { width:3px; }
+#messages-area::-webkit-scrollbar-thumb { background:#2c3e4a; border-radius:2px; }
+
+.day-divider { text-align:center; margin:10px 0; }
+.day-divider span {
+  background:#1c2b33; color:#8a9ba8;
+  font-size:11px; padding:4px 12px; border-radius:10px;
+}
+
+.msg-bubble-wrap        { display:flex; flex-direction:column; margin-bottom:3px; }
+.msg-bubble-wrap.sent   { align-items:flex-end; }
+.msg-bubble-wrap.received { align-items:flex-start; }
+
+.msg-bubble {
+  max-width:78%; padding:9px 13px; border-radius:12px;
+  font-size:15px; line-height:1.45; word-break:break-word;
+}
+.sent .msg-bubble     { background:#005c4b; color:#e8f4f8; border-bottom-right-radius:3px; }
+.received .msg-bubble { background:#1c2b33; color:#e8f4f8; border-bottom-left-radius:3px; }
+
+.msg-unsent-bubble { background:transparent !important; border:1.5px dashed #2c3e4a !important; }
+.msg-unsent-text   { font-style:italic; color:#4a6070 !important; font-size:13px; }
+
+.msg-meta      { font-size:10px; color:#8a9ba8; margin-top:2px; padding:0 4px; }
+.sent .msg-meta{ text-align:right; }
+
+.spinner { text-align:center; color:#25d366; padding:24px; font-size:13px; }
+
+/* BOTTOM BAR */
+.chat-bottom {
+  background:#1c2b33; padding:10px;
+  flex-shrink:0; border-top:1px solid #2c3e4a;
+}
+.input-row { display:flex; align-items:flex-end; gap:8px; }
+
+#msg-input {
+  flex:1; background:#0d1f2b; border:1.5px solid #2c3e4a;
+  border-radius:22px; color:#fff; font-size:16px;
+  padding:11px 18px; outline:none; resize:none;
+  max-height:120px; min-height:44px; line-height:1.4;
+  font-family:inherit; overflow-y:auto;
+}
+#msg-input:focus       { border-color:#25d366; }
+#msg-input::placeholder{ color:#4a6070; }
+
+#send-btn {
+  width:44px; height:44px; border-radius:50%; background:#25d366;
+  border:none; cursor:pointer; display:flex; align-items:center;
+  justify-content:center; flex-shrink:0;
+  transition:background .2s,transform .1s;
+}
+#send-btn:active { transform:scale(.92); background:#1da954; }
+#send-btn svg    { width:22px; height:22px; fill:#fff; }
+
+.hidden { display:none !important; }
 </style>
 </head>
 <body>
 
-<!-- LANDING -->
-<div id="landingScreen">
-  <div class="land-logo">💬</div>
-  <div class="land-title">Enterprise Chat</div>
-  <div class="land-sub">Connect with our support team instantly. Fast, secure, and private.</div>
-  <div class="land-btns">
-    <button class="land-btn-primary" onclick="showScreen('loginScreen')">Log In</button>
-    <button class="land-btn-secondary" onclick="showScreen('signupScreen')">Create Account</button>
-  </div>
+<!-- LOADING -->
+<div id="loading-overlay">
+  <div class="loader"></div>
+  <span style="color:#8a9ba8;font-size:14px">Loading…</span>
 </div>
 
-<!-- LOGIN -->
-<div id="loginScreen" class="hidden" style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:24px;background:#111b21;">
-  <div class="auth-logo">🔒</div>
-  <div class="auth-card">
-    <h2>Welcome Back</h2>
+<!-- AUTH SCREEN -->
+<div id="auth-screen" class="hidden">
+  <div class="auth-logo">💬</div>
+  <div class="auth-title">ChatApp</div>
+  <div class="auth-sub">Connect with support instantly</div>
+
+  <!-- LOGIN CARD -->
+  <div class="auth-card" id="login-card">
+    <h2>Welcome back</h2>
     <div class="input-group">
       <label>Phone Number</label>
-      <input type="tel" id="loginPhone" placeholder="e.g. 0712345678" inputmode="tel">
+      <input type="tel" id="login-phone" placeholder="e.g. 0712345678" autocomplete="tel">
+    </div>
+    <div class="input-group" id="login-pw-group" style="display:none">
+      <label>Password</label>
+      <div class="pw-wrap">
+        <input type="password" id="login-pw" placeholder="Enter your password" autocomplete="current-password">
+        <button class="eye-btn" onclick="toggleEye('login-pw',this)">👁️</button>
+      </div>
+    </div>
+    <div class="msg-err" id="login-err"></div>
+    <button class="btn-primary" id="login-next-btn" onclick="loginNext()">Continue</button>
+    <div class="auth-switch">No account? <a onclick="showSignup()">Create one</a></div>
+  </div>
+
+  <!-- SIGNUP CARD -->
+  <div class="auth-card hidden" id="signup-card">
+    <h2>Create account</h2>
+    <div class="input-group">
+      <label>Phone Number</label>
+      <input type="tel" id="su-phone" placeholder="e.g. 0712345678" autocomplete="tel">
     </div>
     <div class="input-group">
       <label>Password</label>
-      <input type="password" id="loginPass" placeholder="Enter password">
-      <button class="eye-btn" onclick="toggleEye('loginPass',this)">👁️</button>
-    </div>
-    <div class="auth-err" id="loginErr"></div>
-    <button class="auth-btn" onclick="doLogin()">Log In</button>
-    <div class="auth-link">No account? <span onclick="showScreen('signupScreen')">Create one</span></div>
-    <div class="auth-link" style="margin-top:8px;"><span onclick="showScreen('landingScreen')">← Back</span></div>
-  </div>
-</div>
-
-<!-- SIGNUP -->
-<div id="signupScreen" class="hidden" style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:24px;background:#111b21;">
-  <div class="auth-logo">📱</div>
-  <div class="auth-card">
-    <h2>Create Account</h2>
-    <div class="input-group">
-      <label>Phone Number</label>
-      <input type="tel" id="signupPhone" placeholder="e.g. 0712345678" inputmode="tel">
-    </div>
-    <div class="input-group">
-      <label>Password</label>
-      <input type="password" id="signupPass" placeholder="Create password">
-      <button class="eye-btn" onclick="toggleEye('signupPass',this)">👁️</button>
+      <div class="pw-wrap">
+        <input type="password" id="su-pw" placeholder="Create a password" autocomplete="new-password">
+        <button class="eye-btn" onclick="toggleEye('su-pw',this)">👁️</button>
+      </div>
     </div>
     <div class="input-group">
       <label>Confirm Password</label>
-      <input type="password" id="signupPass2" placeholder="Re-enter password">
-      <button class="eye-btn" onclick="toggleEye('signupPass2',this)">👁️</button>
+      <div class="pw-wrap">
+        <input type="password" id="su-pw2" placeholder="Repeat your password" autocomplete="new-password">
+        <button class="eye-btn" onclick="toggleEye('su-pw2',this)">👁️</button>
+      </div>
     </div>
-    <div class="auth-err" id="signupErr"></div>
-    <button class="auth-btn" onclick="doSignup()">Create Account</button>
-    <div class="auth-link">Already have account? <span onclick="showScreen('loginScreen')">Log In</span></div>
-    <div class="auth-link" style="margin-top:8px;"><span onclick="showScreen('landingScreen')">← Back</span></div>
+    <div class="msg-err" id="signup-err"></div>
+    <button class="btn-primary" onclick="doSignup()">Create Account</button>
+    <div class="auth-switch">Have an account? <a onclick="showLogin()">Log in</a></div>
   </div>
 </div>
 
-<!-- CHAT -->
-<div id="chatScreen" class="hidden">
-  <div class="top-bar">
-    <div class="top-left">
-      <div class="user-avatar" id="userAvatar">U</div>
-      <div class="top-phone" id="userPhoneDisplay">Loading...</div>
+<!-- CHAT SCREEN -->
+<div id="chat-screen">
+
+  <!-- TOP BAR -->
+  <div class="chat-topbar">
+    <div class="topbar-left">
+      <div class="user-avatar" id="top-avatar">U</div>
+      <div>
+        <div class="user-phone" id="top-phone"></div>
+        <div class="user-status">Online</div>
+      </div>
     </div>
-    <div class="top-right">
-      <a class="wa-btn" href="https://wa.me/254734081951?text=Hello!%20I'd%20like%20this%20Programme." target="_blank">
-        <span>📱</span> WhatsApp
+    <div class="topbar-right">
+      <a class="btn-wa"
+         href="https://wa.me/254734081951?text=Hello!%20I'd%20like%20this%20Programme."
+         target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94
+          1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198
+          0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077
+          4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421
+          7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0
+          01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893
+          6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157
+          11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0
+          11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+        </svg>
+        WhatsApp
       </a>
-      <button class="logout-btn" onclick="doLogout()">Logout</button>
+      <button class="btn-logout" onclick="doLogout()">Logout</button>
     </div>
   </div>
 
-  <div class="messages-area" id="messagesArea">
-    <div class="loading" id="msgLoading">Loading messages...</div>
+  <!-- MESSAGES -->
+  <div id="messages-area">
+    <div class="spinner" id="chat-spinner">Loading messages…</div>
   </div>
 
-  <div class="wa-chat-bar">
-    <a class="wa-chat-btn" href="https://wa.me/254734081951?text=Hello!%20I'd%20like%20this%20Programme." target="_blank">
-      💬 Chat us on WhatsApp
-    </a>
-  </div>
-
-  <div class="input-area">
-    <div class="msg-input-wrap">
-      <button class="clip-btn" onclick="showToast('📎 Attachment coming soon!')">📎</button>
-      <textarea class="msg-input" id="msgInput" placeholder="Type a message" rows="1" onInput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
+  <!-- BOTTOM INPUT -->
+  <div class="chat-bottom">
+    <div class="input-row">
+      <textarea id="msg-input" placeholder="Type a message…" rows="1"
+        oninput="autoResize(this)" onkeydown="msgKeyDown(event)"></textarea>
+      <button id="send-btn" onclick="sendMessage()">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
     </div>
-    <button class="send-btn" onclick="sendMessage()">➤</button>
   </div>
-</div>
 
-<div id="toastEl" class="toast hidden"></div>
+</div><!-- end chat-screen -->
 
+<!-- FIREBASE -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, getDoc, addDoc, onSnapshot, query, orderBy, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { initializeApp }    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, doc,
+  addDoc, setDoc, getDoc,
+  onSnapshot, query, orderBy,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDh2fHMUbysckAxdIA8dcz8sHWrcLbW1EQ",
-  authDomain: "african-enterprise-challenge-f.firebaseapp.com",
-  projectId: "african-enterprise-challenge-f",
-  storageBucket: "african-enterprise-challenge-f.firebasestorage.app",
+/* ── Firebase config ── */
+const app = initializeApp({
+  apiKey:            "AIzaSyDh2fHMUbysckAxdIA8dcz8sHWrcLbW1EQ",
+  authDomain:        "african-enterprise-challenge-f.firebaseapp.com",
+  projectId:         "african-enterprise-challenge-f",
+  storageBucket:     "african-enterprise-challenge-f.firebasestorage.app",
   messagingSenderId: "85146331644",
-  appId: "1:85146331644:web:b28599e0c8b75498fe6a79",
-  measurementId: "G-6C670QY54S"
-};
-
-const app = initializeApp(firebaseConfig);
+  appId:             "1:85146331644:web:b28599e0c8b75498fe6a79",
+  measurementId:     "G-6C670QY54S"
+});
 const db = getFirestore(app);
-window.db = db;
-window.fbModules = { collection, doc, setDoc, getDoc, addDoc, onSnapshot, query, orderBy, serverTimestamp, updateDoc };
 
-const saved = localStorage.getItem('chatUser');
-if(saved){
-  const u = JSON.parse(saved);
-  window.currentUser = u;
-  initChat(u);
-} else {
-  showScreen('landingScreen');
+/* ── State ── */
+let currentUser   = null;
+let unsubMessages = null;
+let loginStep     = 1;
+let loginPhone    = '';
+
+/* ── Helpers ── */
+async function hashPw(pw) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
+function cleanPhone(p) { return p.replace(/\s+/g,'').replace(/[^0-9+]/g,''); }
+function setErr(id, msg) { document.getElementById(id).textContent = msg; }
 
-window.doSignup = async function(){
-  const phone = document.getElementById('signupPhone').value.trim();
-  const pass = document.getElementById('signupPass').value;
-  const pass2 = document.getElementById('signupPass2').value;
-  const err = document.getElementById('signupErr');
-  err.textContent='';
-  if(!phone){err.textContent='Enter phone number';return;}
-  if(pass.length<6){err.textContent='Password min 6 characters';return;}
-  if(pass!==pass2){err.textContent='Passwords do not match';return;}
-  try{
-    const userRef = doc(db,'users',phone);
-    const snap = await getDoc(userRef);
-    if(snap.exists()){err.textContent='Phone already registered. Log in instead.';return;}
-    await setDoc(userRef,{phone,password:btoa(pass),createdAt:new Date().toISOString()});
-    const u={phone};
-    localStorage.setItem('chatUser',JSON.stringify(u));
-    window.currentUser=u;
-    initChat(u);
-  }catch(e){err.textContent='Error: '+e.message;}
+/* ── Eye toggle ── */
+window.toggleEye = function(id, btn) {
+  const inp = document.getElementById(id);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  btn.textContent = inp.type === 'password' ? '👁️' : '🙈';
 };
 
-window.doLogin = async function(){
-  const phone = document.getElementById('loginPhone').value.trim();
-  const pass = document.getElementById('loginPass').value;
-  const err = document.getElementById('loginErr');
-  err.textContent='';
-  if(!phone){err.textContent='Enter phone number';return;}
-  if(!pass){err.textContent='Enter password';return;}
-  try{
-    const userRef = doc(db,'users',phone);
-    const snap = await getDoc(userRef);
-    if(!snap.exists()){err.textContent='No account found. Create one first.';return;}
-    const data=snap.data();
-    if(atob(data.password)!==pass){err.textContent='Incorrect password';return;}
-    const u={phone};
-    localStorage.setItem('chatUser',JSON.stringify(u));
-    window.currentUser=u;
-    initChat(u);
-  }catch(e){err.textContent='Error: '+e.message;}
+/* ── Show/hide auth cards ── */
+window.showSignup = function() {
+  document.getElementById('login-card').classList.add('hidden');
+  document.getElementById('signup-card').classList.remove('hidden');
+};
+window.showLogin = function() {
+  document.getElementById('signup-card').classList.add('hidden');
+  document.getElementById('login-card').classList.remove('hidden');
+  document.getElementById('login-pw-group').style.display = 'none';
+  document.getElementById('login-next-btn').textContent = 'Continue';
+  loginStep = 1; loginPhone = '';
 };
 
-window.doLogout = function(){
-  if(!confirm('Log out?')) return;
-  localStorage.removeItem('chatUser');
-  window.currentUser=null;
-  if(window.unsubMessages) window.unsubMessages();
-  showScreen('landingScreen');
-};
+/* ── Login flow ── */
+window.loginNext = async function() {
 
-window.initChat = function(u){
-  showScreen('chatScreen');
-  document.getElementById('userPhoneDisplay').textContent=u.phone;
-  document.getElementById('userAvatar').textContent=u.phone.charAt(0);
-  loadMessages(u.phone);
-};
-
-window.loadMessages = function(phone){
-  const {collection,query,orderBy,onSnapshot}=window.fbModules;
-  const db=window.db;
-  const chatRef=collection(db,'chats',phone,'messages');
-  const q=query(chatRef,orderBy('timestamp','asc'));
-  document.getElementById('msgLoading').style.display='block';
-  if(window.unsubMessages) window.unsubMessages();
-  window.unsubMessages=onSnapshot(q,(snap)=>{
-    document.getElementById('msgLoading').style.display='none';
-    renderMessages(snap.docs.map(d=>({id:d.id,...d.data()})));
-  });
-};
-
-window.renderMessages = function(msgs){
-  const area=document.getElementById('messagesArea');
-  let lastDate='';
-  area.innerHTML='';
-  if(msgs.length===0){
-    area.innerHTML='<div class="loading">No messages yet. Say hello! 👋</div>';
-    return;
-  }
-  msgs.forEach(m=>{
-    const ts=m.timestamp?.toDate?m.timestamp.toDate():new Date(m.timestamp||Date.now());
-    const dateStr=ts.toLocaleDateString('en-KE',{day:'numeric',month:'short',year:'numeric'});
-    if(dateStr!==lastDate){
-      lastDate=dateStr;
-      area.innerHTML+=`<div class="date-divider"><span>${dateStr}</span></div>`;
+  if (loginStep === 1) {
+    const raw = document.getElementById('login-phone').value.trim();
+    if (!raw) { setErr('login-err','Enter your phone number'); return; }
+    const phone = cleanPhone(raw);
+    setErr('login-err','');
+    const btn = document.getElementById('login-next-btn');
+    btn.textContent = 'Checking…'; btn.disabled = true;
+    try {
+      const snap = await getDoc(doc(db,'users',phone));
+      btn.disabled = false;
+      if (snap.exists()) {
+        loginPhone = phone;
+        loginStep  = 2;
+        document.getElementById('login-pw-group').style.display = 'block';
+        btn.textContent = 'Log In';
+        document.getElementById('login-pw').focus();
+      } else {
+        setErr('login-err','No account found. Create one below.');
+        showSignup();
+        document.getElementById('su-phone').value = raw;
+      }
+    } catch(e) {
+      btn.disabled = false; btn.textContent = 'Continue';
+      setErr('login-err','Network error. Try again.');
     }
-    const isSent=m.sender==='user';
-    const timeStr=ts.toLocaleTimeString('en-KE',{hour:'2-digit',minute:'2-digit'});
-    if(m.unsent&&!isSent){ return; }
-    const unsentClass=m.unsent?'unsent':'';
-    const displayText=m.unsent?'🚫 Message unsent':escHtml(m.text||'');
-    area.innerHTML+=`
-      <div class="msg-row ${isSent?'sent':'received'}">
-        <div class="msg-bubble ${unsentClass}" data-id="${m.id}">
-          ${displayText}
-          <span class="msg-time">${timeStr}${isSent?'<span class="msg-tick"> ✓✓</span>':''}</span>
-        </div>
-      </div>`;
-  });
-  area.scrollTop=area.scrollHeight;
+
+  } else {
+    const pw  = document.getElementById('login-pw').value;
+    if (!pw) { setErr('login-err','Enter your password'); return; }
+    const btn = document.getElementById('login-next-btn');
+    btn.textContent = 'Logging in…'; btn.disabled = true;
+    try {
+      const hash = await hashPw(pw);
+      const snap = await getDoc(doc(db,'users',loginPhone));
+      if (snap.data().password === hash) {
+        localStorage.setItem('chat_user', loginPhone);
+        enterChat(loginPhone);
+      } else {
+        btn.disabled = false; btn.textContent = 'Log In';
+        setErr('login-err','Wrong password. Try again.');
+      }
+    } catch(e) {
+      btn.disabled = false; btn.textContent = 'Log In';
+      setErr('login-err','Error. Try again.');
+    }
+  }
 };
 
-window.sendMessage = async function(){
-  const input=document.getElementById('msgInput');
-  const text=input.value.trim();
-  if(!text||!window.currentUser) return;
-  input.value='';
-  input.style.height='auto';
-  const {collection,addDoc,serverTimestamp,doc,setDoc}=window.fbModules;
-  const db=window.db;
-  try{
-    await addDoc(collection(db,'chats',window.currentUser.phone,'messages'),{
-      text,sender:'user',timestamp:serverTimestamp(),unsent:false
+/* ── Signup ── */
+window.doSignup = async function() {
+  const raw  = document.getElementById('su-phone').value.trim();
+  const pw   = document.getElementById('su-pw').value;
+  const pw2  = document.getElementById('su-pw2').value;
+  if (!raw) { setErr('signup-err','Enter your phone number'); return; }
+  if (!pw)  { setErr('signup-err','Enter a password'); return; }
+  if (pw !== pw2) { setErr('signup-err','Passwords do not match'); return; }
+  if (pw.length < 6) { setErr('signup-err','Password must be at least 6 characters'); return; }
+  const phone = cleanPhone(raw);
+  setErr('signup-err','');
+  try {
+    const snap = await getDoc(doc(db,'users',phone));
+    if (snap.exists()) {
+      setErr('signup-err','Account already exists. Log in instead.');
+      showLogin();
+      document.getElementById('login-phone').value = raw;
+      return;
+    }
+    const hash = await hashPw(pw);
+    await setDoc(doc(db,'users',phone), { phone, password:hash, createdAt:serverTimestamp() });
+    localStorage.setItem('chat_user', phone);
+    enterChat(phone);
+  } catch(e) {
+    setErr('signup-err','Error creating account. Try again.');
+  }
+};
+
+/* ── Logout ── */
+window.doLogout = function() {
+  if (!confirm('Log out?')) return;
+  localStorage.removeItem('chat_user');
+  if (unsubMessages) unsubMessages();
+  currentUser = null; loginStep = 1; loginPhone = '';
+  document.getElementById('chat-screen').style.display = 'none';
+  document.getElementById('auth-screen').classList.remove('hidden');
+  document.getElementById('login-pw-group').style.display = 'none';
+  document.getElementById('login-next-btn').textContent = 'Continue';
+  document.getElementById('login-phone').value = '';
+  document.getElementById('login-pw').value    = '';
+  setErr('login-err','');
+};
+
+/* ── Enter chat ── */
+function enterChat(phone) {
+  currentUser = phone;
+  document.getElementById('auth-screen').classList.add('hidden');
+  const cs = document.getElementById('chat-screen');
+  cs.style.display = 'flex'; cs.style.flexDirection = 'column';
+  document.getElementById('top-avatar').textContent = phone.slice(-2);
+  document.getElementById('top-phone').textContent  = phone;
+  listenMessages(phone);
+  setTimeout(() => document.getElementById('msg-input').focus(), 300);
+}
+
+/* ── Real-time messages ── */
+let lastDateStr = '';
+
+function listenMessages(phone) {
+  if (unsubMessages) unsubMessages();
+  document.getElementById('chat-spinner').style.display = 'block';
+  const q = query(
+    collection(db,'chats',phone,'messages'),
+    orderBy('timestamp','asc')
+  );
+  unsubMessages = onSnapshot(q, snap => {
+    document.getElementById('chat-spinner').style.display = 'none';
+    renderMessages(snap.docs);
+  });
+}
+
+function renderMessages(docs) {
+  const area     = document.getElementById('messages-area');
+  const atBottom = area.scrollHeight - area.scrollTop - area.clientHeight < 80;
+  area.innerHTML = '';
+  lastDateStr    = '';
+
+  docs.forEach(d => {
+    const data = d.data();
+
+    /* day divider */
+    if (data.timestamp) {
+      const dt  = data.timestamp.toDate ? data.timestamp.toDate() : new Date(data.timestamp);
+      const ds  = dt.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'});
+      if (ds !== lastDateStr) {
+        lastDateStr = ds;
+        const div = document.createElement('div');
+        div.className = 'day-divider';
+        div.innerHTML = `<span>${ds}</span>`;
+        area.appendChild(div);
+      }
+    }
+
+    /* bubble */
+    const isMe    = data.sender === 'user';
+    const unsent  = data.unsent || data.adminUnsent;
+
+    const wrap   = document.createElement('div');
+    wrap.className = `msg-bubble-wrap ${isMe ? 'sent' : 'received'}`;
+
+    const bubble = document.createElement('div');
+    bubble.className = 'msg-bubble' + (unsent ? ' msg-unsent-bubble' : '');
+
+    /* what text to show */
+    if (data.adminUnsent) {
+      /* admin unsent → show nothing, treat as blank */
+      bubble.innerHTML = '&nbsp;';
+      bubble.style.minWidth = '0';
+      bubble.style.padding  = '0';
+      bubble.style.border   = 'none';
+      wrap.style.display    = 'none'; /* hide completely */
+    } else if (data.unsent) {
+      bubble.textContent = 'This message was unsent';
+      bubble.classList.add('msg-unsent-text');
+    } else {
+      bubble.textContent = data.text || '';
+    }
+
+    /* time */
+    const meta = document.createElement('div');
+    meta.className = 'msg-meta';
+    if (data.timestamp) {
+      const dt = data.timestamp.toDate ? data.timestamp.toDate() : new Date(data.timestamp);
+      meta.textContent = dt.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    }
+
+    wrap.appendChild(bubble);
+    wrap.appendChild(meta);
+    area.appendChild(wrap);
+  });
+
+  if (atBottom) area.scrollTop = area.scrollHeight;
+}
+
+/* ── Send message ── */
+window.sendMessage = async function() {
+  const inp  = document.getElementById('msg-input');
+  const text = inp.value.trim();
+  if (!text || !currentUser) return;
+  inp.value = ''; inp.style.height = '';
+  try {
+    await addDoc(collection(db,'chats',currentUser,'messages'), {
+      text, sender:'user', timestamp:serverTimestamp(), unsent:false, adminUnsent:false
     });
-    await setDoc(doc(db,'users',window.currentUser.phone),{lastMessage:text,lastTime:serverTimestamp(),hasNew:true},{merge:true});
-  }catch(e){showToast('Send failed: '+e.message);}
+    await setDoc(doc(db,'chats',currentUser), {
+      phone:currentUser, lastMsg:text, lastTime:serverTimestamp(), unread:true
+    }, {merge:true});
+  } catch(e) { console.error(e); }
 };
-</script>
 
-<script>
-function showScreen(id){
-  ['landingScreen','loginScreen','signupScreen','chatScreen'].forEach(s=>{
-    const el=document.getElementById(s);
-    if(!el) return;
-    if(s===id){ el.classList.remove('hidden'); el.style.display='flex'; }
-    else { el.classList.add('hidden'); el.style.display='none'; }
-  });
+window.msgKeyDown = function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+};
+
+window.autoResize = function(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+};
+
+/* ── Init ── */
+async function init() {
+  await new Promise(r => setTimeout(r, 700));
+  document.getElementById('loading-overlay').style.display = 'none';
+  const saved = localStorage.getItem('chat_user');
+  if (saved) {
+    try {
+      const snap = await getDoc(doc(db,'users',saved));
+      if (snap.exists()) { enterChat(saved); return; }
+    } catch(e) {}
+  }
+  document.getElementById('auth-screen').classList.remove('hidden');
 }
-function toggleEye(inputId,btn){
-  const inp=document.getElementById(inputId);
-  if(inp.type==='password'){inp.type='text';btn.textContent='🙈';}
-  else{inp.type='password';btn.textContent='👁️';}
-}
-function autoResize(el){
-  el.style.height='auto';
-  el.style.height=Math.min(el.scrollHeight,120)+'px';
-}
-function handleKey(e){
-  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}
-}
-function escHtml(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
-function showToast(msg){
-  const t=document.getElementById('toastEl');
-  t.textContent=msg;t.classList.remove('hidden');
-  setTimeout(()=>t.classList.add('hidden'),3000);
-}
+init();
 </script>
 </body>
 </html>
