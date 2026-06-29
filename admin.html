@@ -3,379 +3,730 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Admin Panel</title>
+<title>Admin Panel – ChatApp</title>
 <style>
-  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-  body{font-family:'Segoe UI',sans-serif;background:#111b21;color:#e9edef;height:100dvh;display:flex;flex-direction:column;overflow:hidden;max-width:480px;margin:0 auto;}
-  #adminLogin{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:24px;background:#111b21;}
-  .admin-logo{font-size:48px;margin-bottom:12px;text-align:center;}
-  .admin-badge{background:#00a884;color:#fff;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:20px;letter-spacing:1px;}
-  .auth-card{background:#1f2c34;border-radius:16px;padding:24px;width:100%;max-width:360px;}
-  .auth-card h2{font-size:18px;color:#e9edef;margin-bottom:20px;text-align:center;}
-  .input-group{margin-bottom:16px;position:relative;}
-  .input-group label{display:block;font-size:12px;color:#8696a0;margin-bottom:6px;}
-  .input-group input{width:100%;background:#2a3942;border:1px solid #374045;border-radius:10px;padding:14px 48px 14px 14px;color:#e9edef;font-size:16px;outline:none;}
-  .input-group input:focus{border-color:#00a884;}
-  .eye-btn{position:absolute;right:14px;top:38px;background:none;border:none;color:#8696a0;font-size:18px;cursor:pointer;}
-  .auth-btn{width:100%;background:#00a884;color:#fff;border:none;border-radius:10px;padding:15px;font-size:16px;font-weight:600;cursor:pointer;margin-top:8px;}
-  .auth-err{color:#f15c6d;font-size:12px;margin-top:8px;text-align:center;min-height:16px;}
-  #adminPanel{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-  .top-bar{background:#1f2c34;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;min-height:56px;}
-  .top-title{font-size:15px;font-weight:700;color:#00a884;display:flex;align-items:center;gap:6px;}
-  .top-right{display:flex;align-items:center;gap:8px;}
-  .wa-btn{background:#25d366;color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;display:flex;align-items:center;gap:4px;}
-  .logout-btn{background:#f15c6d;color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer;}
-  #usersList{flex:1;overflow-y:auto;background:#111b21;}
-  .user-item{display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid #1f2c34;cursor:pointer;gap:12px;position:relative;}
-  .user-item:active{background:#1f2c34;}
-  .user-item.has-new .user-phone{color:#25d366;font-weight:700;}
-  .u-avatar{width:46px;height:46px;border-radius:50%;background:#2a3942;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#00a884;flex-shrink:0;}
-  .u-info{flex:1;min-width:0;}
-  .user-phone{font-size:15px;font-weight:600;color:#e9edef;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .user-preview{font-size:13px;color:#8696a0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
-  .u-meta{text-align:right;flex-shrink:0;}
-  .u-time{font-size:11px;color:#8696a0;}
-  .new-dot{width:18px;height:18px;background:#00a884;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;margin-top:4px;margin-left:auto;}
-  .empty-list{text-align:center;padding:40px;color:#8696a0;font-size:14px;}
-  .delete-hint{font-size:10px;color:#8696a0;text-align:center;padding:8px;background:#111b21;}
-  #chatView{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-  .chat-top{background:#1f2c34;padding:10px 12px;display:flex;align-items:center;gap:12px;flex-shrink:0;min-height:56px;}
-  .back-btn{background:none;border:none;color:#00a884;font-size:22px;cursor:pointer;padding:0 4px;}
-  .chat-user-phone{font-size:15px;font-weight:600;color:#e9edef;}
-  .chat-user-sub{font-size:12px;color:#8696a0;}
-  .messages-area{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:4px;background:#0b141a;}
-  .msg-row{display:flex;margin-bottom:2px;}
-  .msg-row.sent{justify-content:flex-end;}
-  .msg-row.received{justify-content:flex-start;}
-  .msg-bubble{max-width:78%;padding:7px 12px 20px;border-radius:8px;position:relative;word-wrap:break-word;font-size:15px;line-height:1.4;cursor:pointer;user-select:none;}
-  .msg-row.sent .msg-bubble{background:#005c4b;border-radius:8px 0 8px 8px;color:#e9edef;}
-  .msg-row.received .msg-bubble{background:#1f2c34;border-radius:0 8px 8px 8px;color:#e9edef;}
-  .msg-bubble.unsent{background:transparent!important;border:1px dashed #374045;color:#8696a0;font-style:italic;padding:7px 12px;}
-  .msg-time{position:absolute;bottom:4px;right:10px;font-size:11px;color:#8696a0;}
-  .date-divider{text-align:center;margin:10px 0;}
-  .date-divider span{background:#1f2c34;color:#8696a0;font-size:12px;padding:4px 12px;border-radius:20px;}
-  .input-area{background:#1f2c34;padding:8px 10px;display:flex;align-items:flex-end;gap:8px;flex-shrink:0;min-height:60px;}
-  .msg-input-wrap{flex:1;background:#2a3942;border-radius:24px;display:flex;align-items:flex-end;padding:8px 14px;min-height:46px;}
-  .msg-input{flex:1;background:none;border:none;color:#e9edef;font-size:16px;outline:none;resize:none;max-height:120px;line-height:1.4;padding:0;font-family:'Segoe UI',sans-serif;}
-  .msg-input::placeholder{color:#8696a0;}
-  .send-btn{width:46px;height:46px;border-radius:50%;background:#00a884;border:none;color:#fff;font-size:20px;cursor:pointer;display:flex;justify-content:center;align-items:center;flex-shrink:0;}
-  .hidden{display:none!important;}
-  .loading{text-align:center;padding:20px;color:#8696a0;font-size:14px;}
-  .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1f2c34;color:#e9edef;padding:10px 20px;border-radius:20px;font-size:13px;z-index:999;border:1px solid #374045;}
-  .ctx-menu{position:fixed;background:#1f2c34;border:1px solid #374045;border-radius:12px;padding:8px 0;z-index:999;min-width:160px;box-shadow:0 8px 24px rgba(0,0,0,0.4);}
-  .ctx-item{padding:12px 20px;font-size:14px;cursor:pointer;color:#e9edef;}
-  .ctx-item:active{background:#2a3942;}
-  .ctx-item.danger{color:#f15c6d;}
-  .ctx-overlay{position:fixed;inset:0;z-index:998;}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+body {
+  font-family:'Segoe UI',sans-serif;
+  background:#0b1014; color:#fff;
+  height:100dvh; display:flex; flex-direction:column; overflow:hidden;
+}
+
+/* ── LOADING ── */
+#loading-overlay {
+  position:fixed; inset:0; background:#0b1014;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:16px; z-index:999;
+}
+.loader {
+  width:36px; height:36px;
+  border:3px solid #2c3e4a; border-top-color:#f39c12;
+  border-radius:50%; animation:spin .8s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* ── ADMIN LOGIN ── */
+#admin-login {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  background:linear-gradient(160deg,#0b1014 0%,#1a2a35 100%);
+  padding:24px;
+}
+.admin-logo  { font-size:52px; margin-bottom:8px; }
+.admin-title { font-size:24px; font-weight:700; color:#f39c12; margin-bottom:4px; }
+.admin-sub   { font-size:13px; color:#8a9ba8; margin-bottom:32px; }
+
+.auth-card {
+  background:#1c2b33; border-radius:16px; padding:28px 24px;
+  width:100%; max-width:380px; box-shadow:0 8px 32px rgba(0,0,0,.5);
+}
+.auth-card h2         { font-size:18px; font-weight:600; margin-bottom:20px; color:#e8f4f8; }
+.input-group          { margin-bottom:16px; }
+.input-group label    { font-size:12px; color:#8a9ba8; display:block; margin-bottom:6px; font-weight:500; }
+.input-group input    {
+  width:100%; padding:14px 16px; background:#0d1f2b;
+  border:1.5px solid #2c3e4a; border-radius:10px;
+  color:#fff; font-size:16px; outline:none;
+}
+.input-group input:focus        { border-color:#f39c12; }
+.input-group input::placeholder { color:#4a6070; }
+
+.pw-wrap       { position:relative; }
+.pw-wrap input { padding-right:48px; }
+.eye-btn {
+  position:absolute; right:14px; top:50%; transform:translateY(-50%);
+  background:none; border:none; cursor:pointer; color:#8a9ba8; font-size:18px; padding:4px;
+}
+
+.btn-primary {
+  width:100%; padding:15px; background:#f39c12; border:none;
+  border-radius:10px; color:#fff; font-size:16px; font-weight:700;
+  cursor:pointer; margin-top:8px;
+}
+.btn-primary:active { background:#d68910; }
+.msg-err { font-size:13px; color:#ff6b6b; margin-top:10px; text-align:center; min-height:18px; }
+
+/* ── ADMIN PANEL wrapper ── */
+#admin-panel { flex:1; display:none; flex-direction:column; height:100dvh; overflow:hidden; }
+
+/* ── SHARED TOP BAR ── */
+.top-bar {
+  background:#1c2b33; padding:10px 14px;
+  display:flex; align-items:center; justify-content:space-between;
+  border-bottom:1px solid #2c3e4a; min-height:56px; flex-shrink:0;
+}
+.top-bar-title { font-size:17px; font-weight:700; color:#f39c12; }
+.top-bar-right { display:flex; align-items:center; gap:8px; }
+
+.btn-wa {
+  background:#25d366; border:none; border-radius:8px;
+  color:#fff; font-size:12px; font-weight:700; padding:7px 10px;
+  display:flex; align-items:center; gap:5px; text-decoration:none; white-space:nowrap;
+}
+.btn-wa svg { width:15px; height:15px; fill:#fff; flex-shrink:0; }
+.btn-logout {
+  background:#e74c3c; border:none; border-radius:8px;
+  color:#fff; font-size:12px; font-weight:700; padding:7px 10px; cursor:pointer; white-space:nowrap;
+}
+.btn-back {
+  background:none; border:none; color:#f39c12;
+  font-size:22px; cursor:pointer; padding:4px 8px; line-height:1;
+}
+
+/* ── USERS LIST VIEW ── */
+#users-view { display:flex; flex-direction:column; flex:1; overflow:hidden; }
+
+.hint-text {
+  font-size:11px; color:#4a6070; text-align:center;
+  padding:6px 16px; background:#0d1f2b; flex-shrink:0;
+}
+
+#users-list { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+#users-list::-webkit-scrollbar       { width:3px; }
+#users-list::-webkit-scrollbar-thumb { background:#2c3e4a; border-radius:2px; }
+
+.user-item {
+  display:flex; align-items:center; gap:12px;
+  padding:13px 16px; border-bottom:1px solid #111d24;
+  cursor:pointer; transition:background .15s;
+}
+.user-item:active { background:#1c2b33; }
+
+.ui-avatar {
+  width:46px; height:46px; border-radius:50%; background:#2c3e4a;
+  display:flex; align-items:center; justify-content:center;
+  font-size:17px; font-weight:700; color:#f39c12; flex-shrink:0;
+}
+.ui-info   { flex:1; min-width:0; }
+.ui-name   {
+  font-size:15px; font-weight:600; color:#e8f4f8;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.ui-name.unread { color:#25d366; }
+.ui-last   {
+  font-size:13px; color:#8a9ba8; margin-top:2px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.ui-meta   { display:flex; flex-direction:column; align-items:flex-end; gap:5px; }
+.ui-time   { font-size:11px; color:#8a9ba8; white-space:nowrap; }
+.ui-dot    {
+  width:10px; height:10px; background:#25d366;
+  border-radius:50%; display:none;
+}
+.ui-dot.show { display:block; }
+
+.spinner   { text-align:center; color:#f39c12; padding:28px; font-size:13px; }
+.empty-msg { text-align:center; color:#4a6070; padding:40px 20px; font-size:14px; }
+
+/* ── SINGLE CHAT VIEW ── */
+#chat-view { display:none; flex-direction:column; flex:1; overflow:hidden; }
+
+.chat-user-phone  { font-size:15px; font-weight:700; color:#e8f4f8; }
+.chat-user-status { font-size:11px; color:#25d366; }
+
+.cv-avatar {
+  width:36px; height:36px; border-radius:50%; background:#2c3e4a; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:14px; font-weight:700; color:#f39c12;
+}
+
+/* messages */
+#admin-messages {
+  flex:1; overflow-y:auto; padding:12px 10px;
+  display:flex; flex-direction:column; gap:2px;
+  background:#0b1014; -webkit-overflow-scrolling:touch;
+}
+#admin-messages::-webkit-scrollbar       { width:3px; }
+#admin-messages::-webkit-scrollbar-thumb { background:#2c3e4a; border-radius:2px; }
+
+.day-divider { text-align:center; margin:10px 0; }
+.day-divider span {
+  background:#1c2b33; color:#8a9ba8;
+  font-size:11px; padding:4px 12px; border-radius:10px;
+}
+
+.msg-bubble-wrap          { display:flex; flex-direction:column; margin-bottom:3px; }
+.msg-bubble-wrap.sent     { align-items:flex-end; }
+.msg-bubble-wrap.received { align-items:flex-start; }
+
+.msg-bubble {
+  max-width:78%; padding:9px 13px; border-radius:12px;
+  font-size:15px; line-height:1.45; word-break:break-word;
+}
+.sent .msg-bubble     { background:#005c4b; color:#e8f4f8; border-bottom-right-radius:3px; }
+.received .msg-bubble { background:#1c2b33; color:#e8f4f8; border-bottom-left-radius:3px; }
+
+.msg-unsent-bubble { background:transparent !important; border:1.5px dashed #2c3e4a !important; }
+.msg-unsent-text   { font-style:italic; color:#4a6070; font-size:13px; }
+
+.msg-meta      { font-size:10px; color:#8a9ba8; margin-top:2px; padding:0 4px; }
+.sent .msg-meta{ text-align:right; }
+
+/* bottom input */
+.chat-bottom {
+  background:#1c2b33; padding:10px;
+  flex-shrink:0; border-top:1px solid #2c3e4a;
+}
+.input-row { display:flex; align-items:flex-end; gap:8px; }
+
+#admin-input {
+  flex:1; background:#0d1f2b; border:1.5px solid #2c3e4a; border-radius:22px;
+  color:#fff; font-size:16px; padding:11px 18px; outline:none; resize:none;
+  max-height:120px; min-height:44px; line-height:1.4;
+  font-family:inherit; overflow-y:auto;
+}
+#admin-input:focus        { border-color:#f39c12; }
+#admin-input::placeholder { color:#4a6070; }
+
+#admin-send-btn {
+  width:44px; height:44px; border-radius:50%; background:#f39c12;
+  border:none; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+#admin-send-btn:active { background:#d68910; }
+#admin-send-btn svg    { width:22px; height:22px; fill:#fff; }
+
+/* ── BOTTOM SHEETS ── */
+.sheet-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:90; display:none;
+}
+.sheet-overlay.open { display:block; }
+
+.bottom-sheet {
+  position:fixed; bottom:0; left:0; right:0;
+  background:#1c2b33; border-radius:18px 18px 0 0;
+  padding:20px 16px 36px; z-index:91; display:none;
+  border-top:1px solid #2c3e4a;
+}
+.bottom-sheet.open { display:block; }
+
+.sheet-title { font-size:13px; color:#8a9ba8; text-align:center; margin-bottom:18px; }
+.sheet-btn {
+  width:100%; padding:14px; border:none; border-radius:10px;
+  font-size:16px; font-weight:600; cursor:pointer; margin-bottom:10px; display:block;
+}
+.sheet-btn.danger { background:#e74c3c; color:#fff; }
+.sheet-btn.cancel { background:#2c3e4a; color:#e8f4f8; }
+
+.hidden { display:none !important; }
 </style>
 </head>
 <body>
 
+<!-- LOADING -->
+<div id="loading-overlay">
+  <div class="loader"></div>
+  <span style="color:#8a9ba8;font-size:14px">Loading…</span>
+</div>
+
 <!-- ADMIN LOGIN -->
-<div id="adminLogin" style="display:flex;">
+<div id="admin-login" class="hidden">
   <div class="admin-logo">🛡️</div>
-  <div class="admin-badge">ADMIN PANEL</div>
+  <div class="admin-title">Admin Panel</div>
+  <div class="admin-sub">ChatApp Administration</div>
   <div class="auth-card">
     <h2>Admin Login</h2>
     <div class="input-group">
       <label>Username</label>
-      <input type="text" id="adminUser" placeholder="Username">
+      <input type="text" id="admin-user" placeholder="Enter username" autocomplete="username">
     </div>
     <div class="input-group">
       <label>Password</label>
-      <input type="password" id="adminPass" placeholder="Password">
-      <button class="eye-btn" onclick="toggleEye('adminPass',this)">👁️</button>
+      <div class="pw-wrap">
+        <input type="password" id="admin-pw" placeholder="Enter password" autocomplete="current-password">
+        <button class="eye-btn" onclick="toggleEye('admin-pw',this)">👁️</button>
+      </div>
     </div>
-    <div class="auth-err" id="adminErr"></div>
-    <button class="auth-btn" onclick="doAdminLogin()">Login</button>
+    <div class="msg-err" id="admin-err"></div>
+    <button class="btn-primary" onclick="doAdminLogin()">Login</button>
   </div>
 </div>
 
 <!-- ADMIN PANEL -->
-<div id="adminPanel" class="hidden" style="display:flex;">
+<div id="admin-panel">
 
-  <!-- USERS LIST -->
-  <div id="usersView" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+  <!-- ① USERS LIST VIEW -->
+  <div id="users-view">
     <div class="top-bar">
-      <div class="top-title">🛡️ Admin Panel</div>
-      <div class="top-right">
-        <a class="wa-btn" href="https://wa.me/254734081951?text=Hello!%20I'd%20like%20this%20Programme." target="_blank">📱 WhatsApp</a>
-        <button class="logout-btn" onclick="adminLogout()">Logout</button>
+      <div class="top-bar-title">💬 All Chats</div>
+      <div class="top-bar-right">
+        <a class="btn-wa"
+           href="https://wa.me/254734081951?text=Hello!%20I'd%20like%20this%20Programme."
+           target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94
+            1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198
+            0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077
+            4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421
+            7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0
+            01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893
+            6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157
+            11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0
+            11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+          </svg>
+          WhatsApp
+        </a>
+        <button class="btn-logout" onclick="adminLogout()">Logout</button>
       </div>
     </div>
-    <div class="delete-hint">Long press a user to delete</div>
-    <div id="usersList"><div class="loading">Loading users...</div></div>
-  </div>
-
-  <!-- CHAT VIEW -->
-  <div id="chatView" class="hidden" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
-    <div class="chat-top">
-      <button class="back-btn" onclick="backToList()">←</button>
-      <div id="chatAvatar" style="width:36px;height:36px;border-radius:50%;background:#00a884;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0;">U</div>
-      <div style="margin-left:10px;">
-        <div class="chat-user-phone" id="chatPhone">User</div>
-        <div class="chat-user-sub">Admin chat</div>
-      </div>
-    </div>
-    <div class="messages-area" id="adminMsgs">
-      <div class="loading">Loading chat...</div>
-    </div>
-    <div class="input-area">
-      <div class="msg-input-wrap">
-        <textarea class="msg-input" id="adminInput" placeholder="Type a message" rows="1" onInput="autoResize(this)" onkeydown="handleAdminKey(event)"></textarea>
-      </div>
-      <button class="send-btn" onclick="adminSend()">➤</button>
+    <div class="hint-text">Long press a user to delete their account</div>
+    <div id="users-list">
+      <div class="spinner" id="users-spinner">Loading users…</div>
     </div>
   </div>
 
+  <!-- ② SINGLE CHAT VIEW -->
+  <div id="chat-view">
+    <div class="top-bar">
+      <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
+        <button class="btn-back" onclick="backToUsers()">&#8592;</button>
+        <div class="cv-avatar" id="cv-avatar">U</div>
+        <div style="min-width:0;">
+          <div class="chat-user-phone"  id="cv-phone">…</div>
+          <div class="chat-user-status">Tap ← to go back</div>
+        </div>
+      </div>
+      <div class="top-bar-right">
+        <a class="btn-wa"
+           href="https://wa.me/254734081951?text=Hello!%20I'd%20like%20this%20Programme."
+           target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94
+            1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198
+            0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077
+            4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421
+            7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0
+            01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893
+            6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157
+            11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0
+            11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+          </svg>
+          WhatsApp
+        </a>
+        <button class="btn-logout" onclick="adminLogout()">Logout</button>
+      </div>
+    </div>
+
+    <div id="admin-messages">
+      <div class="spinner" id="admin-msg-spinner">Loading messages…</div>
+    </div>
+
+    <div class="chat-bottom">
+      <div class="input-row">
+        <textarea id="admin-input" placeholder="Type a message to this user…" rows="1"
+          oninput="adminResize(this)" onkeydown="adminKeyDown(event)"></textarea>
+        <button id="admin-send-btn" onclick="adminSend()">
+          <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end admin-panel -->
+
+<!-- USER DELETE SHEET -->
+<div class="sheet-overlay" id="user-sheet-overlay" onclick="closeUserSheet()"></div>
+<div class="bottom-sheet"  id="user-sheet">
+  <div class="sheet-title" id="user-sheet-title">User options</div>
+  <button class="sheet-btn danger" onclick="confirmDeleteUser()">🗑️ Delete User &amp; All Chats</button>
+  <button class="sheet-btn cancel" onclick="closeUserSheet()">Cancel</button>
 </div>
 
-<div id="toastEl" class="toast hidden"></div>
-<div id="ctxOverlay" class="ctx-overlay hidden" onclick="closeCtx()"></div>
-<div id="ctxMenu" class="ctx-menu hidden"></div>
+<!-- MESSAGE UNSEND SHEET -->
+<div class="sheet-overlay" id="msg-sheet-overlay" onclick="closeMsgSheet()"></div>
+<div class="bottom-sheet"  id="msg-sheet">
+  <div class="sheet-title">Message options</div>
+  <button class="sheet-btn danger" onclick="doAdminUnsend()">↩️ Unsend this message</button>
+  <button class="sheet-btn cancel" onclick="closeMsgSheet()">Cancel</button>
+</div>
 
+<!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, getDocs, addDoc, onSnapshot, query, orderBy, serverTimestamp, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  getFirestore, collection, doc,
+  addDoc, setDoc, getDoc, getDocs,
+  onSnapshot, query, orderBy,
+  serverTimestamp, updateDoc,
+  deleteDoc, writeBatch
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDh2fHMUbysckAxdIA8dcz8sHWrcLbW1EQ",
-  authDomain: "african-enterprise-challenge-f.firebaseapp.com",
-  projectId: "african-enterprise-challenge-f",
-  storageBucket: "african-enterprise-challenge-f.firebasestorage.app",
+/* ── Firebase config ── */
+const app = initializeApp({
+  apiKey:            "AIzaSyDh2fHMUbysckAxdIA8dcz8sHWrcLbW1EQ",
+  authDomain:        "african-enterprise-challenge-f.firebaseapp.com",
+  projectId:         "african-enterprise-challenge-f",
+  storageBucket:     "african-enterprise-challenge-f.firebasestorage.app",
   messagingSenderId: "85146331644",
-  appId: "1:85146331644:web:b28599e0c8b75498fe6a79",
-  measurementId: "G-6C670QY54S"
+  appId:             "1:85146331644:web:b28599e0c8b75498fe6a79",
+  measurementId:     "G-6C670QY54S"
+});
+const db = getFirestore(app);
+
+/* ── Admin credentials ── */
+const ADMIN_USER = 'Kibet Davis';
+const ADMIN_PASS = 'Kwenik254$';
+
+/* ── State ── */
+let currentChatPhone = null;
+let unsubMessages    = null;
+let unsubUsers       = null;
+let selectedUser     = null;
+let selectedMsgId    = null;
+let lpTimer          = null;  // long-press timer
+
+/* ── Eye toggle ── */
+window.toggleEye = function(id, btn) {
+  const inp = document.getElementById(id);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  btn.textContent = inp.type === 'password' ? '👁️' : '🙈';
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-window.db = db;
-window.fbM = { collection, doc, setDoc, getDocs, addDoc, onSnapshot, query, orderBy, serverTimestamp, updateDoc, deleteDoc };
-
-if(localStorage.getItem('adminLoggedIn')==='yes'){ showAdminPanel(); }
-
-window.doAdminLogin = function(){
-  const user = document.getElementById('adminUser').value.trim();
-  const pass = document.getElementById('adminPass').value;
-  const err = document.getElementById('adminErr');
-  err.textContent = '';
-  if(user==='Kibet Davis' && pass==='Kwenik254$'){
-    localStorage.setItem('adminLoggedIn','yes');
-    showAdminPanel();
+/* ── Admin login ── */
+window.doAdminLogin = function() {
+  const u = document.getElementById('admin-user').value.trim();
+  const p = document.getElementById('admin-pw').value;
+  if (u === ADMIN_USER && p === ADMIN_PASS) {
+    localStorage.setItem('admin_session','1');
+    document.getElementById('admin-login').classList.add('hidden');
+    const panel = document.getElementById('admin-panel');
+    panel.style.display = 'flex'; panel.style.flexDirection = 'column';
+    startUsersListener();
   } else {
-    err.textContent = 'Invalid username or password';
+    document.getElementById('admin-err').textContent = 'Wrong username or password.';
   }
 };
 
-function showAdminPanel(){
-  document.getElementById('adminLogin').classList.add('hidden');
-  document.getElementById('adminLogin').style.display='none';
-  document.getElementById('adminPanel').classList.remove('hidden');
-  document.getElementById('adminPanel').style.display='flex';
-  loadUsers();
+window.adminLogout = function() {
+  if (!confirm('Log out of admin panel?')) return;
+  localStorage.removeItem('admin_session');
+  if (unsubUsers)    unsubUsers();
+  if (unsubMessages) unsubMessages();
+  document.getElementById('admin-panel').style.display = 'none';
+  document.getElementById('admin-login').classList.remove('hidden');
+  document.getElementById('admin-user').value = '';
+  document.getElementById('admin-pw').value   = '';
+  document.getElementById('admin-err').textContent = '';
+};
+
+/* ══════════════════════════
+   USERS LIST
+══════════════════════════ */
+function startUsersListener() {
+  document.getElementById('users-spinner').style.display = 'block';
+  if (unsubUsers) unsubUsers();
+
+  unsubUsers = onSnapshot(collection(db,'chats'), snap => {
+    document.getElementById('users-spinner').style.display = 'none';
+    const list = document.getElementById('users-list');
+    list.innerHTML = '';
+
+    /* sort most-recent first */
+    const docs = snap.docs
+      .filter(d => d.data().phone)
+      .sort((a,b) => {
+        const ta = a.data().lastTime?.toMillis?.() ?? 0;
+        const tb = b.data().lastTime?.toMillis?.() ?? 0;
+        return tb - ta;
+      });
+
+    if (!docs.length) {
+      list.innerHTML = '<div class="empty-msg">No users yet</div>';
+      return;
+    }
+
+    docs.forEach(d => {
+      const data    = d.data();
+      const phone   = data.phone || d.id;
+      const lastMsg = data.lastMsg || '';
+      const unread  = !!data.unread;
+      const dt      = data.lastTime?.toDate?.();
+      const timeStr = dt
+        ? dt.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})
+        : '';
+      const initials = phone.replace(/\D/g,'').slice(-2) || 'U';
+
+      const item = document.createElement('div');
+      item.className = 'user-item';
+      item.innerHTML = `
+        <div class="ui-avatar">${initials}</div>
+        <div class="ui-info">
+          <div class="ui-name ${unread?'unread':''}">${phone}</div>
+          <div class="ui-last">${lastMsg ? lastMsg.substring(0,55) : 'No messages yet'}</div>
+        </div>
+        <div class="ui-meta">
+          <div class="ui-time">${timeStr}</div>
+          <div class="ui-dot ${unread?'show':''}"></div>
+        </div>`;
+
+      /* tap → open chat */
+      item.addEventListener('click', () => openChat(phone));
+
+      /* long press → delete sheet */
+      const startLP = () => { lpTimer = setTimeout(() => openUserSheet(phone), 700); };
+      const clearLP = () => clearTimeout(lpTimer);
+      item.addEventListener('touchstart', startLP, {passive:true});
+      item.addEventListener('touchend',   clearLP);
+      item.addEventListener('touchmove',  clearLP);
+      item.addEventListener('mousedown',  startLP);
+      item.addEventListener('mouseup',    clearLP);
+      item.addEventListener('mouseleave', clearLP);
+
+      list.appendChild(item);
+    });
+  });
 }
 
-window.adminLogout = function(){
-  if(!confirm('Logout?')) return;
-  localStorage.removeItem('adminLoggedIn');
-  if(window.unsubUsers) window.unsubUsers();
-  if(window.unsubChat) window.unsubChat();
-  document.getElementById('adminLogin').classList.remove('hidden');
-  document.getElementById('adminLogin').style.display='flex';
-  document.getElementById('adminPanel').classList.add('hidden');
-  document.getElementById('adminPanel').style.display='none';
+/* ══════════════════════════
+   USER-DELETE SHEET
+══════════════════════════ */
+function openUserSheet(phone) {
+  selectedUser = phone;
+  document.getElementById('user-sheet-title').textContent = `Delete user: ${phone}`;
+  document.getElementById('user-sheet-overlay').classList.add('open');
+  document.getElementById('user-sheet').classList.add('open');
+}
+window.closeUserSheet = function() {
+  document.getElementById('user-sheet-overlay').classList.remove('open');
+  document.getElementById('user-sheet').classList.remove('open');
+  selectedUser = null;
+};
+window.confirmDeleteUser = async function() {
+  if (!selectedUser) { closeUserSheet(); return; }
+  const phone = selectedUser;
+  closeUserSheet();
+  if (!confirm(`Permanently delete user ${phone} and all their messages?`)) return;
+  try {
+    /* delete all messages in sub-collection */
+    const msgs  = await getDocs(collection(db,'chats',phone,'messages'));
+    const batch = writeBatch(db);
+    msgs.forEach(m => batch.delete(m.ref));
+    await batch.commit();
+    /* delete chat doc + user doc */
+    await deleteDoc(doc(db,'chats',phone));
+    await deleteDoc(doc(db,'users',phone));
+  } catch(e) {
+    console.error(e);
+    alert('Error deleting user. Try again.');
+  }
 };
 
-window.loadUsers = function(){
-  const {collection,onSnapshot}=window.fbM;
-  if(window.unsubUsers) window.unsubUsers();
-  window.unsubUsers=onSnapshot(collection(db,'users'),(snap)=>{
-    const users=snap.docs.map(d=>({id:d.id,...d.data()}));
-    users.sort((a,b)=>{
-      const ta=a.lastTime?.toDate?.()?.getTime()||0;
-      const tb=b.lastTime?.toDate?.()?.getTime()||0;
-      return tb-ta;
-    });
-    renderUsers(users);
+/* ══════════════════════════
+   OPEN CHAT
+══════════════════════════ */
+function openChat(phone) {
+  currentChatPhone = phone;
+
+  /* switch views */
+  document.getElementById('users-view').style.display = 'none';
+  const cv = document.getElementById('chat-view');
+  cv.style.display = 'flex'; cv.style.flexDirection = 'column';
+
+  document.getElementById('cv-phone').textContent  = phone;
+  document.getElementById('cv-avatar').textContent = phone.replace(/\D/g,'').slice(-2) || 'U';
+
+  /* mark read */
+  updateDoc(doc(db,'chats',phone), {unread:false}).catch(()=>{});
+
+  listenAdminMessages(phone);
+  setTimeout(() => document.getElementById('admin-input').focus(), 300);
+}
+
+window.backToUsers = function() {
+  if (unsubMessages) { unsubMessages(); unsubMessages = null; }
+  currentChatPhone = null;
+  document.getElementById('chat-view').style.display  = 'none';
+  const uv = document.getElementById('users-view');
+  uv.style.display = 'flex'; uv.style.flexDirection = 'column';
+};
+
+/* ══════════════════════════
+   MESSAGES LISTENER
+══════════════════════════ */
+function listenAdminMessages(phone) {
+  if (unsubMessages) unsubMessages();
+  document.getElementById('admin-msg-spinner').style.display = 'block';
+  const q = query(
+    collection(db,'chats',phone,'messages'),
+    orderBy('timestamp','asc')
+  );
+  unsubMessages = onSnapshot(q, snap => {
+    document.getElementById('admin-msg-spinner').style.display = 'none';
+    renderAdminMessages(snap.docs);
   });
-};
+}
 
-function renderUsers(users){
-  const list=document.getElementById('usersList');
-  if(users.length===0){
-    list.innerHTML='<div class="empty-list">No users yet.<br>They will appear here when they sign up.</div>';
+let lastAdminDate = '';
+function renderAdminMessages(docs) {
+  const area     = document.getElementById('admin-messages');
+  const atBottom = area.scrollHeight - area.scrollTop - area.clientHeight < 80;
+  area.innerHTML = '';
+  lastAdminDate  = '';
+
+  if (!docs.length) {
+    area.innerHTML = '<div class="empty-msg">No messages yet — send the first one!</div>';
     return;
   }
-  list.innerHTML='';
-  users.forEach(u=>{
-    const phone=u.phone||u.id;
-    const div=document.createElement('div');
-    div.className='user-item'+(u.hasNew?' has-new':'');
-    const ts=u.lastTime?.toDate?.();
-    const timeStr=ts?ts.toLocaleTimeString('en-KE',{hour:'2-digit',minute:'2-digit'}):'';
-    div.innerHTML=`
-      <div class="u-avatar">${escHtml(phone.charAt(0))}</div>
-      <div class="u-info">
-        <div class="user-phone">${escHtml(phone)}</div>
-        <div class="user-preview">${escHtml(u.lastMessage||'No messages yet')}</div>
-      </div>
-      <div class="u-meta">
-        <div class="u-time">${timeStr}</div>
-        ${u.hasNew?'<div class="new-dot">●</div>':''}
-      </div>`;
-    div.onclick=()=>openChat(phone);
-    let pressTimer;
-    div.addEventListener('touchstart',()=>{pressTimer=setTimeout(()=>showUserCtx(phone,div),600);},{passive:true});
-    div.addEventListener('touchend',()=>clearTimeout(pressTimer));
-    div.addEventListener('touchmove',()=>clearTimeout(pressTimer));
-    div.addEventListener('mousedown',()=>{pressTimer=setTimeout(()=>showUserCtx(phone,div),600);});
-    div.addEventListener('mouseup',()=>clearTimeout(pressTimer));
-    list.appendChild(div);
+
+  docs.forEach(d => {
+    const data = d.data();
+
+    /* skip fully-hidden admin-unsent messages */
+    if (data.adminUnsent) return;
+
+    /* day divider */
+    if (data.timestamp) {
+      const dt = data.timestamp.toDate ? data.timestamp.toDate() : new Date(data.timestamp);
+      const ds = dt.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'});
+      if (ds !== lastAdminDate) {
+        lastAdminDate = ds;
+        const div = document.createElement('div');
+        div.className = 'day-divider';
+        div.innerHTML = `<span>${ds}</span>`;
+        area.appendChild(div);
+      }
+    }
+
+    const isAdmin = data.sender === 'admin';
+    const unsent  = data.unsent;   /* user-unsent — visible to admin */
+
+    const wrap   = document.createElement('div');
+    wrap.className = `msg-bubble-wrap ${isAdmin ? 'sent' : 'received'}`;
+
+    const bubble = document.createElement('div');
+    bubble.className = 'msg-bubble' + (unsent ? ' msg-unsent-bubble' : '');
+
+    if (unsent) {
+      bubble.textContent = 'User unsent this message';
+      bubble.classList.add('msg-unsent-text');
+    } else {
+      bubble.textContent = data.text || '';
+    }
+
+    /* time + sender label */
+    const meta = document.createElement('div');
+    meta.className = 'msg-meta';
+    let timeStr = '';
+    if (data.timestamp) {
+      const dt = data.timestamp.toDate ? data.timestamp.toDate() : new Date(data.timestamp);
+      timeStr = dt.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    }
+    meta.textContent = `${isAdmin ? '✓ You' : '👤 User'} · ${timeStr}`;
+
+    /* long-press / double-tap on admin messages to unsend */
+    if (isAdmin && !unsent) {
+      bubble.style.cursor = 'pointer';
+      let lpt;
+      const startLP = () => { lpt = setTimeout(() => openMsgSheet(d.id), 600); };
+      const clearLP = () => clearTimeout(lpt);
+      bubble.addEventListener('touchstart', startLP,  {passive:true});
+      bubble.addEventListener('touchend',   clearLP);
+      bubble.addEventListener('touchmove',  clearLP);
+      bubble.addEventListener('mousedown',  startLP);
+      bubble.addEventListener('mouseup',    clearLP);
+      bubble.addEventListener('mouseleave', clearLP);
+      bubble.addEventListener('dblclick',   () => openMsgSheet(d.id));
+    }
+
+    wrap.appendChild(bubble);
+    wrap.appendChild(meta);
+    area.appendChild(wrap);
   });
+
+  if (atBottom) area.scrollTop = area.scrollHeight;
 }
 
-window.showUserCtx = function(phone,el){
-  const menu=document.getElementById('ctxMenu');
-  const overlay=document.getElementById('ctxOverlay');
-  menu.innerHTML=`
-    <div class="ctx-item danger" onclick="deleteUser('${escHtml(phone)}')">🗑️ Delete User</div>
-    <div class="ctx-item" onclick="closeCtx()">Cancel</div>`;
-  const rect=el.getBoundingClientRect();
-  menu.style.top=(rect.bottom+4)+'px';
-  menu.style.left='50%';
-  menu.style.transform='translateX(-50%)';
-  menu.classList.remove('hidden');
-  overlay.classList.remove('hidden');
-};
-
-window.closeCtx=()=>{
-  document.getElementById('ctxMenu').classList.add('hidden');
-  document.getElementById('ctxOverlay').classList.add('hidden');
-};
-
-window.deleteUser = async function(phone){
-  closeCtx();
-  if(!confirm(`Delete user ${phone} and all their messages?`)) return;
-  try{
-    const {collection,getDocs,deleteDoc,doc}=window.fbM;
-    const msgsSnap=await getDocs(collection(db,'chats',phone,'messages'));
-    for(const m of msgsSnap.docs) await deleteDoc(m.ref);
-    await deleteDoc(doc(db,'users',phone));
-    showToast('User deleted ✓');
-  }catch(e){showToast('Error: '+e.message);}
-};
-
-window.currentChatPhone=null;
-
-window.openChat = async function(phone){
-  window.currentChatPhone=phone;
-  document.getElementById('usersView').style.display='none';
-  document.getElementById('chatView').classList.remove('hidden');
-  document.getElementById('chatView').style.display='flex';
-  document.getElementById('chatPhone').textContent=phone;
-  document.getElementById('chatAvatar').textContent=phone.charAt(0);
-  try{
-    const {doc,updateDoc}=window.fbM;
-    await updateDoc(doc(db,'users',phone),{hasNew:false});
-  }catch(e){}
-  loadAdminChat(phone);
-};
-
-window.backToList=function(){
-  if(window.unsubChat) window.unsubChat();
-  document.getElementById('chatView').classList.add('hidden');
-  document.getElementById('chatView').style.display='none';
-  document.getElementById('usersView').style.display='flex';
-  window.currentChatPhone=null;
-};
-
-window.loadAdminChat=function(phone){
-  const {collection,query,orderBy,onSnapshot}=window.fbM;
-  const q=query(collection(db,'chats',phone,'messages'),orderBy('timestamp','asc'));
-  document.getElementById('adminMsgs').innerHTML='<div class="loading">Loading...</div>';
-  if(window.unsubChat) window.unsubChat();
-  window.unsubChat=onSnapshot(q,(snap)=>{
-    renderAdminMsgs(snap.docs.map(d=>({id:d.id,...d.data()})));
-  });
-};
-
-window.renderAdminMsgs=function(msgs){
-  const area=document.getElementById('adminMsgs');
-  let lastDate='';
-  area.innerHTML='';
-  if(msgs.length===0){area.innerHTML='<div class="loading">No messages yet.</div>';return;}
-  msgs.forEach(m=>{
-    const ts=m.timestamp?.toDate?m.timestamp.toDate():new Date(m.timestamp||Date.now());
-    const dateStr=ts.toLocaleDateString('en-KE',{day:'numeric',month:'short',year:'numeric'});
-    if(dateStr!==lastDate){
-      lastDate=dateStr;
-      area.innerHTML+=`<div class="date-divider"><span>${dateStr}</span></div>`;
-    }
-    const isSent=m.sender==='admin';
-    const timeStr=ts.toLocaleTimeString('en-KE',{hour:'2-digit',minute:'2-digit'});
-    const unsentClass=m.unsent?'unsent':'';
-    const displayText=m.unsent?'🚫 Message unsent':escHtml(m.text||'');
-    const div=document.createElement('div');
-    div.className=`msg-row ${isSent?'sent':'received'}`;
-    div.innerHTML=`<div class="msg-bubble ${unsentClass}" data-id="${m.id}">
-      ${displayText}
-      <span class="msg-time">${timeStr}</span>
-    </div>`;
-    if(isSent&&!m.unsent){
-      let lastTap=0;
-      div.querySelector('.msg-bubble').addEventListener('touchend',()=>{
-        const now=Date.now();
-        if(now-lastTap<400){ adminUnsend(m.id); }
-        lastTap=now;
-      });
-      div.querySelector('.msg-bubble').addEventListener('dblclick',()=>adminUnsend(m.id));
-    }
-    area.appendChild(div);
-  });
-  area.scrollTop=area.scrollHeight;
-};
-
-window.adminUnsend=async function(msgId){
-  if(!window.currentChatPhone||!msgId) return;
-  if(!confirm('Unsend this message?')) return;
-  try{
-    const {doc,updateDoc}=window.fbM;
-    await updateDoc(doc(db,'chats',window.currentChatPhone,'messages',msgId),{unsent:true,text:''});
-    showToast('Message unsent ✓');
-  }catch(e){showToast('Error: '+e.message);}
-};
-
-window.adminSend=async function(){
-  const input=document.getElementById('adminInput');
-  const text=input.value.trim();
-  if(!text||!window.currentChatPhone) return;
-  input.value='';input.style.height='auto';
-  const {collection,addDoc,serverTimestamp,doc,updateDoc}=window.fbM;
-  try{
-    await addDoc(collection(db,'chats',window.currentChatPhone,'messages'),{
-      text,sender:'admin',timestamp:serverTimestamp(),unsent:false
+/* ══════════════════════════
+   ADMIN SEND
+══════════════════════════ */
+window.adminSend = async function() {
+  const inp  = document.getElementById('admin-input');
+  const text = inp.value.trim();
+  if (!text || !currentChatPhone) return;
+  inp.value = ''; inp.style.height = '';
+  try {
+    await addDoc(collection(db,'chats',currentChatPhone,'messages'), {
+      text, sender:'admin',
+      timestamp:serverTimestamp(),
+      unsent:false, adminUnsent:false
     });
-    await updateDoc(doc(db,'users',window.currentChatPhone),{lastMessage:'Admin: '+text,lastTime:serverTimestamp()});
-    showToast('Sent ✓');
-  }catch(e){showToast('Error: '+e.message);}
+    await setDoc(doc(db,'chats',currentChatPhone), {
+      phone:currentChatPhone,
+      lastMsg:`(Admin) ${text}`,
+      lastTime:serverTimestamp(),
+      unread:false
+    }, {merge:true});
+  } catch(e) { console.error(e); }
 };
-</script>
 
-<script>
-function toggleEye(inputId,btn){
-  const inp=document.getElementById(inputId);
-  if(inp.type==='password'){inp.type='text';btn.textContent='🙈';}
-  else{inp.type='password';btn.textContent='👁️';}
+window.adminKeyDown = function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); adminSend(); }
+};
+window.adminResize = function(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+};
+
+/* ══════════════════════════
+   ADMIN UNSEND
+══════════════════════════ */
+function openMsgSheet(msgId) {
+  selectedMsgId = msgId;
+  document.getElementById('msg-sheet-overlay').classList.add('open');
+  document.getElementById('msg-sheet').classList.add('open');
 }
-function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
-function handleAdminKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();adminSend();}}
-function escHtml(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
-function showToast(msg){
-  const t=document.getElementById('toastEl');
-  t.textContent=msg;t.classList.remove('hidden');
-  setTimeout(()=>t.classList.add('hidden'),3000);
+window.closeMsgSheet = function() {
+  document.getElementById('msg-sheet-overlay').classList.remove('open');
+  document.getElementById('msg-sheet').classList.remove('open');
+  selectedMsgId = null;
+};
+window.doAdminUnsend = async function() {
+  if (!selectedMsgId || !currentChatPhone) { closeMsgSheet(); return; }
+  try {
+    await updateDoc(
+      doc(db,'chats',currentChatPhone,'messages',selectedMsgId),
+      { adminUnsent:true, text:'' }
+    );
+  } catch(e) { console.error(e); }
+  closeMsgSheet();
+};
+
+/* ══════════════════════════
+   INIT
+══════════════════════════ */
+async function init() {
+  await new Promise(r => setTimeout(r, 700));
+  document.getElementById('loading-overlay').style.display = 'none';
+  if (localStorage.getItem('admin_session') === '1') {
+    const panel = document.getElementById('admin-panel');
+    panel.style.display = 'flex'; panel.style.flexDirection = 'column';
+    startUsersListener();
+  } else {
+    document.getElementById('admin-login').classList.remove('hidden');
+  }
 }
+init();
 </script>
 </body>
 </html>
