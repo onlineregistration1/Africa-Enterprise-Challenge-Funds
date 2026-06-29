@@ -9,10 +9,10 @@
 <body>
 <div id="app">
 
-  <!-- Auth -->
+  <!-- Auth Screen -->
   <div id="authScreen" class="screen">
     <h2 id="authTitle">Welcome</h2>
-    <input type="tel" id="phone" placeholder="+2665... phone" inputmode="tel">
+    <input type="tel" id="phone" placeholder="+2665... phone number" inputmode="tel">
     <div class="pwd-wrap">
       <input type="password" id="pwd" placeholder="Password">
       <span class="eye" onclick="togglePwd('pwd')">👁️</span>
@@ -25,7 +25,7 @@
     <p id="authMsg"></p>
   </div>
 
-  <!-- Chat -->
+  <!-- Chat Screen -->
   <div id="chatScreen" class="screen hidden">
     <header>
       <span id="chatHead">Chat</span>
@@ -38,12 +38,16 @@
     <div id="chatBox"></div>
 
     <div id="inputWrap">
+      <div id="previewBar"></div>
       <div class="row">
         <label class="attachBtn">+
           <input type="file" id="imgInput" accept="image/*" hidden>
         </label>
-        <input type="text" id="msgInput" placeholder="Message" autocomplete="off" inputmode="text">
+        <input type="text" id="msgInput" placeholder="Type a message" autocomplete="off" inputmode="text">
         <button id="sendBtn" type="button">Send</button>
+      </div>
+      <div class="waRow">
+        <a class="waBtn small" href="https://wa.me/254734081951?text=Hello!%20I'd%20like%20this%20Programme." target="_blank">Chat us via WhatsApp</a>
       </div>
     </div>
   </div>
