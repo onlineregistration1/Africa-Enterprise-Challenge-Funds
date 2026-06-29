@@ -35,7 +35,6 @@ $('authBtn').onclick = async ()=>{
   $('authMsg').textContent='';
   if(!ph ||!pw) return $('authMsg').textContent='Fill all fields';
   const email = ph+'@aef.chat';
-
   const uRef = doc(db,'users',ph);
   const snap = await getDoc(uRef);
 
@@ -57,7 +56,7 @@ function enterChat(ph){
   phone=ph;
   $('authScreen').classList.add('hidden');
   $('chatScreen').classList.remove('hidden');
-  $('chatHead').textContent = ph;
+  $('chatHead').textContent = ph; // Point 1: Phone top left
   listen(ph);
   setTimeout(()=>$('msgInput').focus(),300);
 }
@@ -69,25 +68,18 @@ function listen(ph){
     const box=$('chatBox'); box.innerHTML='';
     snap.forEach(d=>{
       const m=d.data();
-      if(m.delUser) return; // User never sees deleted
+      if(m.delUser) return;
       const div=document.createElement('div');
       div.className='msg '+(m.sender==='user'?'sent':'recv');
-      if(m.img){
-        const img=document.createElement('img');
-        img.src=m.img;
-        div.appendChild(img);
-      }else{
-        div.textContent=m.text;
-      }
+      if(m.img){ const img=document.createElement('img'); img.src=m.img; div.appendChild(img); }
+      else{ div.textContent=m.text; }
       box.appendChild(div);
     });
   });
 }
 
 async function sendMsg(text='',imgUrl=''){
-  await addDoc(collection(db,'chats',phone,'messages'),{
-    text, img:imgUrl||'', sender:'user', ts:serverTimestamp(), delUser:false, delAdmin:false
-  });
+  await addDoc(collection(db,'chats',phone,'messages'),{ text, img:imgUrl||'', sender:'user', ts:serverTimestamp(), delUser:false, delAdmin:false });
   await updateDoc(doc(db,'users',phone),{lastSeen:serverTimestamp(),lastSender:'user'});
 }
 
@@ -96,28 +88,22 @@ $('sendBtn').onclick = async ()=>{
   if(!txt) return;
   await sendMsg(txt,'');
   $('msgInput').value=''; $('previewBar').classList.remove('show');
-  $('msgInput').focus();
+  $('msgInput').focus(); // Point 5: Keyboard stays
 }
 
 $('imgInput').onchange = async (e)=>{
-  const file=e.target.files[0];
-  if(!file) return;
+  const file=e.target.files[0]; if(!file) return;
   const storageRef=ref(storage,`chats/${phone}/${Date.now()}_${file.name}`);
   const snap=await uploadBytes(storageRef,file);
   const url=await getDownloadURL(snap.ref);
   await sendMsg('',url);
-  e.target.value='';
-  $('msgInput').focus();
+  e.target.value=''; $('msgInput').focus();
 }
 
-$('msgInput').oninput=()=>{
+$('msgInput').oninput=()=>{ // Point 6: Big previewer
   const p=$('previewBar');
   if($('msgInput').value){p.textContent=$('msgInput').value;p.classList.add('show');}
   else p.classList.remove('show');
 }
 
-$('logoutBtn').onclick=async()=>{
-  await signOut(auth);
-  localStorage.clear();
-  location.reload();
-    }
+$('logoutBtn').onclick=async()=>{ await signOut(auth); localStorage.clear(); location.reload(); }
