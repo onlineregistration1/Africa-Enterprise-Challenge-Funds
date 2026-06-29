@@ -51,14 +51,14 @@ async function loadUsers(){
     row.className='userRow'+(u.lastSender==='user'?' unread':'');
     row.innerHTML=`<span>${u.id}</span><span class="time">${u.lastSeen?new Date(u.lastSeen.seconds*1000).toLocaleTimeString():''}</span>`;
     row.onclick=()=>openChat(u.id,row);
-    row.oncontextmenu=e=>{e.preventDefault(); if(confirm('Delete '+u.id+' and all chats?')) delUser(u.id);};
+    row.oncontextmenu=e=>{e.preventDefault(); if(confirm('Delete '+u.id+' and all chats?')) delUser(u.id);}; // Long press delete
     $('userList').appendChild(row);
   });
 }
 
 function openChat(phone,row){
   activePhone=phone;
-  row.classList.remove('unread');
+  row.classList.remove('unread'); // Mark as read
   $('userList').classList.add('hidden');
   $('chatBox').classList.remove('hidden');
   $('inputWrap').classList.remove('hidden');
@@ -85,13 +85,13 @@ function listen(phone){
     $('chatBox').innerHTML='';
     snap.forEach(d=>{
       const m=d.data();
-      if(m.delAdmin) return;
+      if(m.delAdmin) return; // Admin unsent = blank for both
       const div=document.createElement('div');
       div.className='msg '+(m.sender==='admin'?'sent':'recv');
-      if(m.delUser) div.classList.add('deleted'), div.textContent='Deleted message';
+      if(m.delUser) div.classList.add('deleted'), div.textContent='Deleted message'; // Admin sees this
       else if(m.img){ const img=document.createElement('img'); img.src=m.img; div.appendChild(img); }
       else div.textContent=m.text;
-      div.ondblclick=()=>unsend(d.id,phone);
+      div.ondblclick=()=>unsend(d.id,phone); // Admin only: double tap to unsend
       $('chatBox').appendChild(div);
     });
   });
@@ -108,7 +108,7 @@ $('sendBtn').onclick=async()=>{
   const txt=$('msgInput').value.trim();
   if(!txt&&!$('imgInput').files[0]) return;
   await sendMsg(txt,'');
-  $('msgInput').value='';
+  $('msgInput').value='';$('previewBar').classList.remove('show');
   $('msgInput').focus();
 }
 
@@ -123,8 +123,14 @@ $('imgInput').onchange = async (e)=>{
   $('msgInput').focus();
 }
 
+$('msgInput').oninput=()=>{
+  const p=$('previewBar');
+  if($('msgInput').value){p.textContent=$('msgInput').value;p.classList.add('show');}
+  else p.classList.remove('show');
+}
+
 async function unsend(id,phone){
-  await updateDoc(doc(db,'chats',phone,'messages',id),{delUser:true,delAdmin:true});
+  await updateDoc(doc(db,'chats',phone,'messages',id),{delUser:true,delAdmin:true}); // Blank for both
 }
 
 async function delUser(phone){
@@ -134,4 +140,4 @@ async function delUser(phone){
   msgs.forEach(d=>batch.delete(d.ref));
   await batch.commit();
   closeChat(); loadUsers();
-      }
+    }
