@@ -69,7 +69,7 @@ function listen(ph){
     const box=$('chatBox'); box.innerHTML='';
     snap.forEach(d=>{
       const m=d.data();
-      if(m.delUser) return;
+      if(m.delUser) return; // User never sees deleted
       const div=document.createElement('div');
       div.className='msg '+(m.sender==='user'?'sent':'recv');
       if(m.img){
@@ -95,7 +95,7 @@ $('sendBtn').onclick = async ()=>{
   const txt=$('msgInput').value.trim();
   if(!txt) return;
   await sendMsg(txt,'');
-  $('msgInput').value='';
+  $('msgInput').value=''; $('previewBar').classList.remove('show');
   $('msgInput').focus();
 }
 
@@ -108,6 +108,12 @@ $('imgInput').onchange = async (e)=>{
   await sendMsg('',url);
   e.target.value='';
   $('msgInput').focus();
+}
+
+$('msgInput').oninput=()=>{
+  const p=$('previewBar');
+  if($('msgInput').value){p.textContent=$('msgInput').value;p.classList.add('show');}
+  else p.classList.remove('show');
 }
 
 $('logoutBtn').onclick=async()=>{
