@@ -1,542 +1,340 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Chat App</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Chat App</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  body{font-family:'Segoe UI',sans-serif;background:#111b21;color:#e9edef;height:100dvh;display:flex;flex-direction:column;overflow:hidden;max-width:480px;margin:0 auto;}
+  #authScreen{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:24px;background:#111b21;}
+  .auth-logo{font-size:48px;margin-bottom:12px;}
+  .auth-title{font-size:22px;font-weight:700;color:#00a884;margin-bottom:6px;}
+  .auth-sub{font-size:13px;color:#8696a0;margin-bottom:32px;text-align:center;}
+  .auth-card{background:#1f2c34;border-radius:16px;padding:24px;width:100%;max-width:360px;}
+  .auth-card h2{font-size:18px;color:#e9edef;margin-bottom:20px;text-align:center;}
+  .input-group{margin-bottom:16px;position:relative;}
+  .input-group label{display:block;font-size:12px;color:#8696a0;margin-bottom:6px;}
+  .input-group input{width:100%;background:#2a3942;border:1px solid #374045;border-radius:10px;padding:14px 48px 14px 14px;color:#e9edef;font-size:16px;outline:none;}
+  .input-group input:focus{border-color:#00a884;}
+  .input-group input::placeholder{color:#8696a0;}
+  .eye-btn{position:absolute;right:14px;top:38px;background:none;border:none;color:#8696a0;font-size:18px;cursor:pointer;padding:2px;}
+  .auth-btn{width:100%;background:#00a884;color:#fff;border:none;border-radius:10px;padding:15px;font-size:16px;font-weight:600;cursor:pointer;margin-top:8px;}
+  .auth-btn:active{background:#008f72;}
+  .auth-link{text-align:center;margin-top:16px;font-size:13px;color:#8696a0;}
+  .auth-link span{color:#00a884;cursor:pointer;font-weight:600;}
+  .auth-err{color:#f15c6d;font-size:12px;margin-top:8px;text-align:center;min-height:16px;}
+  #landingScreen{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:24px;background:#111b21;}
+  .land-logo{font-size:64px;margin-bottom:16px;}
+  .land-title{font-size:24px;font-weight:700;color:#00a884;margin-bottom:8px;}
+  .land-sub{font-size:14px;color:#8696a0;margin-bottom:40px;text-align:center;line-height:1.5;}
+  .land-btns{display:flex;flex-direction:column;gap:12px;width:100%;max-width:300px;}
+  .land-btn-primary{background:#00a884;color:#fff;border:none;border-radius:12px;padding:16px;font-size:16px;font-weight:600;cursor:pointer;}
+  .land-btn-secondary{background:#1f2c34;color:#e9edef;border:1px solid #374045;border-radius:12px;padding:16px;font-size:16px;font-weight:600;cursor:pointer;}
+  #chatScreen{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+  .top-bar{background:#1f2c34;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;min-height:56px;z-index:10;}
+  .top-left{display:flex;align-items:center;gap:10px;}
+  .user-avatar{width:36px;height:36px;border-radius:50%;background:#00a884;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0;}
+  .top-phone{font-size:14px;font-weight:600;color:#e9edef;}
+  .top-right{display:flex;align-items:center;gap:8px;}
+  .wa-btn{background:#25d366;color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;text-decoration:none;}
+  .logout-btn{background:#f15c6d;color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer;}
+  .messages-area{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:4px;background:#0b141a;}
+  .messages-area::-webkit-scrollbar{width:4px;}
+  .messages-area::-webkit-scrollbar-thumb{background:#374045;border-radius:4px;}
+  .msg-row{display:flex;margin-bottom:2px;}
+  .msg-row.sent{justify-content:flex-end;}
+  .msg-row.received{justify-content:flex-start;}
+  .msg-bubble{max-width:78%;padding:7px 12px 20px;border-radius:8px;position:relative;word-wrap:break-word;font-size:15px;line-height:1.4;cursor:pointer;}
+  .msg-row.sent .msg-bubble{background:#005c4b;border-radius:8px 0 8px 8px;color:#e9edef;}
+  .msg-row.received .msg-bubble{background:#1f2c34;border-radius:0 8px 8px 8px;color:#e9edef;}
+  .msg-bubble.unsent{background:transparent;border:1px dashed #374045;color:#8696a0;font-style:italic;padding:7px 12px;}
+  .msg-time{position:absolute;bottom:4px;right:10px;font-size:11px;color:#8696a0;}
+  .msg-tick{color:#53bdeb;font-size:11px;}
+  .date-divider{text-align:center;margin:10px 0;}
+  .date-divider span{background:#1f2c34;color:#8696a0;font-size:12px;padding:4px 12px;border-radius:20px;}
+  .input-area{background:#1f2c34;padding:8px 10px;display:flex;align-items:flex-end;gap:8px;flex-shrink:0;min-height:60px;}
+  .msg-input-wrap{flex:1;background:#2a3942;border-radius:24px;display:flex;align-items:flex-end;padding:8px 14px;gap:8px;min-height:46px;}
+  .clip-btn{background:none;border:none;color:#8696a0;font-size:22px;cursor:pointer;padding:0;flex-shrink:0;align-self:flex-end;margin-bottom:2px;}
+  .msg-input{flex:1;background:none;border:none;color:#e9edef;font-size:16px;outline:none;resize:none;max-height:120px;line-height:1.4;padding:0;font-family:'Segoe UI',sans-serif;}
+  .msg-input::placeholder{color:#8696a0;}
+  .send-btn{width:46px;height:46px;border-radius:50%;background:#00a884;border:none;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .send-btn:active{background:#008f72;}
+  .wa-chat-bar{background:#0b141a;padding:6px 12px;display:flex;justify-content:center;flex-shrink:0;}
+  .wa-chat-btn{background:#25d366;color:#fff;border:none;border-radius:20px;padding:8px 20px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;text-decoration:none;}
+  .hidden{display:none!important;}
+  .loading{text-align:center;padding:20px;color:#8696a0;font-size:14px;}
+  .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1f2c34;color:#e9edef;padding:10px 20px;border-radius:20px;font-size:13px;z-index:999;border:1px solid #374045;}
+</style>
+</head>
+<body>
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0a0a0a;
-      color: #fff;
-      height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    /* ── AUTH SCREENS ── */
-    #auth-screen {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100dvh;
-      padding: 24px;
-      background: linear-gradient(160deg, #0d1b2a 0%, #1a2f4a 100%);
-    }
-
-    .auth-logo {
-      width: 72px; height: 72px;
-      background: #25D366;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      margin-bottom: 20px;
-      font-size: 32px;
-    }
-
-    .auth-title {
-      font-size: 22px; font-weight: 700;
-      color: #fff; margin-bottom: 6px; text-align: center;
-    }
-    .auth-subtitle {
-      font-size: 13px; color: #aaa;
-      margin-bottom: 32px; text-align: center;
-    }
-
-    .auth-card {
-      background: #1a1a2e;
-      border-radius: 16px;
-      padding: 24px 20px;
-      width: 100%; max-width: 380px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    }
-
-    .auth-card h2 {
-      font-size: 18px; font-weight: 600;
-      margin-bottom: 20px; color: #25D366;
-    }
-
-    .input-group {
-      margin-bottom: 16px;
-    }
-    .input-group label {
-      font-size: 12px; color: #aaa;
-      display: block; margin-bottom: 6px; font-weight: 500;
-      text-transform: uppercase; letter-spacing: 0.5px;
-    }
-    .input-wrap {
-      position: relative;
-    }
-    .input-wrap input {
-      width: 100%;
-      background: #0d1b2a;
-      border: 1.5px solid #2a3a4a;
-      border-radius: 10px;
-      padding: 13px 44px 13px 14px;
-      color: #fff;
-      font-size: 16px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .input-wrap input:focus { border-color: #25D366; }
-    .input-wrap input::placeholder { color: #555; }
-    .toggle-eye {
-      position: absolute; right: 14px; top: 50%;
-      transform: translateY(-50%);
-      background: none; border: none;
-      color: #888; cursor: pointer; font-size: 18px;
-      padding: 4px;
-    }
-
-    .btn-primary {
-      width: 100%;
-      background: #25D366;
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      padding: 14px;
-      font-size: 16px; font-weight: 600;
-      cursor: pointer;
-      margin-top: 4px;
-      transition: background 0.2s;
-    }
-    .btn-primary:active { background: #1da851; }
-
-    .auth-switch {
-      text-align: center;
-      margin-top: 16px;
-      font-size: 13px; color: #aaa;
-    }
-    .auth-switch a {
-      color: #25D366; text-decoration: none; font-weight: 600;
-      cursor: pointer;
-    }
-
-    .error-msg {
-      background: #3a1a1a;
-      border: 1px solid #c0392b;
-      border-radius: 8px;
-      padding: 10px 12px;
-      font-size: 13px;
-      color: #e74c3c;
-      margin-bottom: 14px;
-      display: none;
-    }
-    .error-msg.show { display: block; }
-
-    /* ── CHAT SCREEN ── */
-    #chat-screen {
-      display: none;
-      flex-direction: column;
-      height: 100dvh;
-      overflow: hidden;
-    }
-
-    /* TOP BAR */
-    .top-bar {
-      background: #1a2f4a;
-      padding: 10px 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-shrink: 0;
-      border-bottom: 1px solid #2a3a4a;
-      min-height: 52px;
-    }
-    .top-phone {
-      font-size: 13px; font-weight: 600;
-      color: #fff;
-      background: #0d2a1a;
-      border: 1.5px solid #25D366;
-      border-radius: 20px;
-      padding: 5px 12px;
-      max-width: 150px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .top-actions {
-      display: flex; gap: 8px; align-items: center;
-    }
-    .btn-whatsapp {
-      background: #25D366;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 6px 12px;
-      font-size: 13px; font-weight: 600;
-      cursor: pointer;
-      display: flex; align-items: center; gap: 5px;
-      text-decoration: none;
-    }
-    .btn-logout {
-      background: #c0392b;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 6px 10px;
-      font-size: 12px; font-weight: 600;
-      cursor: pointer;
-    }
-
-    /* MESSAGES AREA */
-    .messages-area {
-      flex: 1;
-      overflow-y: auto;
-      overflow-x: hidden;
-      padding: 12px 10px;
-      background: #0d1b2a;
-      scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch;
-    }
-    .messages-area::-webkit-scrollbar { width: 3px; }
-    .messages-area::-webkit-scrollbar-thumb { background: #2a3a4a; border-radius: 3px; }
-
-    .msg-bubble {
-      display: flex;
-      margin-bottom: 6px;
-    }
-    .msg-bubble.sent { justify-content: flex-end; }
-    .msg-bubble.received { justify-content: flex-start; }
-
-    .bubble {
-      max-width: 78%;
-      padding: 8px 12px;
-      border-radius: 12px;
-      font-size: 15px;
-      line-height: 1.45;
-      position: relative;
-      word-break: break-word;
-    }
-    .msg-bubble.sent .bubble {
-      background: #005c4b;
-      color: #e9f5f0;
-      border-bottom-right-radius: 3px;
-    }
-    .msg-bubble.received .bubble {
-      background: #1e2d3d;
-      color: #fff;
-      border-bottom-left-radius: 3px;
-    }
-    .bubble.unsent {
-      background: transparent !important;
-      color: transparent !important;
-      padding: 0 !important;
-      min-height: 0 !important;
-      height: 0 !important;
-      margin: 0 !important;
-      overflow: hidden;
-    }
-
-    .msg-time {
-      font-size: 10px;
-      color: #8a9ab0;
-      text-align: right;
-      margin-top: 3px;
-    }
-    .msg-bubble.received .msg-time { text-align: left; }
-
-    .day-divider {
-      text-align: center;
-      margin: 12px 0;
-      font-size: 11px;
-      color: #5a7a9a;
-    }
-    .day-divider span {
-      background: #1a2f4a;
-      padding: 3px 10px;
-      border-radius: 10px;
-    }
-
-    /* BOTTOM BAR */
-    .bottom-bar {
-      background: #1a2f4a;
-      padding: 8px 10px;
-      flex-shrink: 0;
-      border-top: 1px solid #2a3a4a;
-    }
-    .whatsapp-cta {
-      margin-bottom: 8px;
-    }
-    .btn-wa-cta {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      background: #25D366;
-      color: #fff;
-      text-decoration: none;
-< truncated lines 272-420 >
-      <button class="btn-logout" onclick="doLogout()">Logout</button>
-    </div>
-  </div>
-
-  <div class="messages-area" id="messages-area">
-    <div class="empty-chat" id="empty-chat">
-      <div class="icon">💬</div>
-      <p>No messages yet.<br>Say hello below!</p>
-    </div>
-  </div>
-
-  <div class="bottom-bar">
-    <div class="whatsapp-cta">
-      <a class="btn-wa-cta" href="https://wa.me/254734081951?text=Hello!%20I'd%20like%20this%20Programme." target="_blank">
-        💬 Chat us via WhatsApp
-      </a>
-    </div>
-    <div class="input-row">
-      <span class="clipboard-icon" id="emoji-btn">😊</span>
-      <div class="msg-input-wrap">
-        <textarea class="msg-input" id="msg-input" placeholder="Type a message..." rows="1"
-          oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
-      </div>
-      <button class="send-btn" onclick="sendMessage()">➤</button>
-    </div>
+<!-- LANDING -->
+<div id="landingScreen">
+  <div class="land-logo">💬</div>
+  <div class="land-title">Enterprise Chat</div>
+  <div class="land-sub">Connect with our support team instantly. Fast, secure, and private.</div>
+  <div class="land-btns">
+    <button class="land-btn-primary" onclick="showScreen('loginScreen')">Log In</button>
+    <button class="land-btn-secondary" onclick="showScreen('signupScreen')">Create Account</button>
   </div>
 </div>
 
-<!-- Firebase -->
+<!-- LOGIN -->
+<div id="loginScreen" class="hidden" style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:24px;background:#111b21;">
+  <div class="auth-logo">🔒</div>
+  <div class="auth-card">
+    <h2>Welcome Back</h2>
+    <div class="input-group">
+      <label>Phone Number</label>
+      <input type="tel" id="loginPhone" placeholder="e.g. 0712345678" inputmode="tel">
+    </div>
+    <div class="input-group">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="Enter password">
+      <button class="eye-btn" onclick="toggleEye('loginPass',this)">👁️</button>
+    </div>
+    <div class="auth-err" id="loginErr"></div>
+    <button class="auth-btn" onclick="doLogin()">Log In</button>
+    <div class="auth-link">No account? <span onclick="showScreen('signupScreen')">Create one</span></div>
+    <div class="auth-link" style="margin-top:8px;"><span onclick="showScreen('landingScreen')">← Back</span></div>
+  </div>
+</div>
+
+<!-- SIGNUP -->
+<div id="signupScreen" class="hidden" style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:24px;background:#111b21;">
+  <div class="auth-logo">📱</div>
+  <div class="auth-card">
+    <h2>Create Account</h2>
+    <div class="input-group">
+      <label>Phone Number</label>
+      <input type="tel" id="signupPhone" placeholder="e.g. 0712345678" inputmode="tel">
+    </div>
+    <div class="input-group">
+      <label>Password</label>
+      <input type="password" id="signupPass" placeholder="Create password">
+      <button class="eye-btn" onclick="toggleEye('signupPass',this)">👁️</button>
+    </div>
+    <div class="input-group">
+      <label>Confirm Password</label>
+      <input type="password" id="signupPass2" placeholder="Re-enter password">
+      <button class="eye-btn" onclick="toggleEye('signupPass2',this)">👁️</button>
+    </div>
+    <div class="auth-err" id="signupErr"></div>
+    <button class="auth-btn" onclick="doSignup()">Create Account</button>
+    <div class="auth-link">Already have account? <span onclick="showScreen('loginScreen')">Log In</span></div>
+    <div class="auth-link" style="margin-top:8px;"><span onclick="showScreen('landingScreen')">← Back</span></div>
+  </div>
+</div>
+
+<!-- CHAT -->
+<div id="chatScreen" class="hidden">
+  <div class="top-bar">
+    <div class="top-left">
+      <div class="user-avatar" id="userAvatar">U</div>
+      <div class="top-phone" id="userPhoneDisplay">Loading...</div>
+    </div>
+    <div class="top-right">
+      <a class="wa-btn" href="https://wa.me/254734081951?text=Hello!%20I'd%20like%20this%20Programme." target="_blank">
+        <span>📱</span> WhatsApp
+      </a>
+      <button class="logout-btn" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="messages-area" id="messagesArea">
+    <div class="loading" id="msgLoading">Loading messages...</div>
+  </div>
+
+  <div class="wa-chat-bar">
+    <a class="wa-chat-btn" href="https://wa.me/254734081951?text=Hello!%20I'd%20like%20this%20Programme." target="_blank">
+      💬 Chat us on WhatsApp
+    </a>
+  </div>
+
+  <div class="input-area">
+    <div class="msg-input-wrap">
+      <button class="clip-btn" onclick="showToast('📎 Attachment coming soon!')">📎</button>
+      <textarea class="msg-input" id="msgInput" placeholder="Type a message" rows="1" onInput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
+    </div>
+    <button class="send-btn" onclick="sendMessage()">➤</button>
+  </div>
+</div>
+
+<div id="toastEl" class="toast hidden"></div>
+
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import {
-    getFirestore, collection, doc, setDoc, getDoc,
-    addDoc, onSnapshot, query, orderBy, serverTimestamp, updateDoc
-  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, doc, setDoc, getDoc, addDoc, onSnapshot, query, orderBy, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDh2fHMUbysckAxdIA8dcz8sHWrcLbW1EQ",
-    authDomain: "african-enterprise-challenge-f.firebaseapp.com",
-    projectId: "african-enterprise-challenge-f",
-    storageBucket: "african-enterprise-challenge-f.firebasestorage.app",
-    messagingSenderId: "85146331644",
-    appId: "1:85146331644:web:b28599e0c8b75498fe6a79"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyDh2fHMUbysckAxdIA8dcz8sHWrcLbW1EQ",
+  authDomain: "african-enterprise-challenge-f.firebaseapp.com",
+  projectId: "african-enterprise-challenge-f",
+  storageBucket: "african-enterprise-challenge-f.firebasestorage.app",
+  messagingSenderId: "85146331644",
+  appId: "1:85146331644:web:b28599e0c8b75498fe6a79",
+  measurementId: "G-6C670QY54S"
+};
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+window.db = db;
+window.fbModules = { collection, doc, setDoc, getDoc, addDoc, onSnapshot, query, orderBy, serverTimestamp, updateDoc };
 
-  let currentUser = null;
-  let unsubMessages = null;
+const saved = localStorage.getItem('chatUser');
+if(saved){
+  const u = JSON.parse(saved);
+  window.currentUser = u;
+  initChat(u);
+} else {
+  showScreen('landingScreen');
+}
 
-  // ── UTILS ──
-  function phoneKey(phone) {
-    return phone.replace(/\D/g, '');
-  }
+window.doSignup = async function(){
+  const phone = document.getElementById('signupPhone').value.trim();
+  const pass = document.getElementById('signupPass').value;
+  const pass2 = document.getElementById('signupPass2').value;
+  const err = document.getElementById('signupErr');
+  err.textContent='';
+  if(!phone){err.textContent='Enter phone number';return;}
+  if(pass.length<6){err.textContent='Password min 6 characters';return;}
+  if(pass!==pass2){err.textContent='Passwords do not match';return;}
+  try{
+    const userRef = doc(db,'users',phone);
+    const snap = await getDoc(userRef);
+    if(snap.exists()){err.textContent='Phone already registered. Log in instead.';return;}
+    await setDoc(userRef,{phone,password:btoa(pass),createdAt:new Date().toISOString()});
+    const u={phone};
+    localStorage.setItem('chatUser',JSON.stringify(u));
+    window.currentUser=u;
+    initChat(u);
+  }catch(e){err.textContent='Error: '+e.message;}
+};
 
-  function hashPass(pass) {
-    // Simple hash for demo — in production use bcrypt server-side
-    let h = 0;
-    for (let i = 0; i < pass.length; i++) {
-      h = Math.imul(31, h) + pass.charCodeAt(i) | 0;
-    }
-    return h.toString(36) + pass.length;
-  }
+window.doLogin = async function(){
+  const phone = document.getElementById('loginPhone').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const err = document.getElementById('loginErr');
+  err.textContent='';
+  if(!phone){err.textContent='Enter phone number';return;}
+  if(!pass){err.textContent='Enter password';return;}
+  try{
+    const userRef = doc(db,'users',phone);
+    const snap = await getDoc(userRef);
+    if(!snap.exists()){err.textContent='No account found. Create one first.';return;}
+    const data=snap.data();
+    if(atob(data.password)!==pass){err.textContent='Incorrect password';return;}
+    const u={phone};
+    localStorage.setItem('chatUser',JSON.stringify(u));
+    window.currentUser=u;
+    initChat(u);
+  }catch(e){err.textContent='Error: '+e.message;}
+};
 
-  function formatTime(ts) {
-    if (!ts) return '';
-    const d = ts.toDate ? ts.toDate() : new Date(ts);
-    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
+window.doLogout = function(){
+  if(!confirm('Log out?')) return;
+  localStorage.removeItem('chatUser');
+  window.currentUser=null;
+  if(window.unsubMessages) window.unsubMessages();
+  showScreen('landingScreen');
+};
 
-  function formatDay(ts) {
-    if (!ts) return '';
-    const d = ts.toDate ? ts.toDate() : new Date(ts);
-    const today = new Date();
-    const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
-    if (d.toDateString() === today.toDateString()) return 'Today';
-    if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
-    return d.toLocaleDateString();
-  }
+window.initChat = function(u){
+  showScreen('chatScreen');
+  document.getElementById('userPhoneDisplay').textContent=u.phone;
+  document.getElementById('userAvatar').textContent=u.phone.charAt(0);
+  loadMessages(u.phone);
+};
 
-  // ── SESSION ──
-  function saveSession(user) {
-    localStorage.setItem('aec_user', JSON.stringify(user));
-  }
-  function loadSession() {
-    try { return JSON.parse(localStorage.getItem('aec_user')); } catch { return null; }
-  }
-  function clearSession() {
-    localStorage.removeItem('aec_user');
-  }
-
-  // ── SHOW/HIDE ──
-  window.showLogin = () => {
-    document.getElementById('login-card').style.display = '';
-    document.getElementById('signup-card').style.display = 'none';
-  };
-  window.showSignup = () => {
-    document.getElementById('login-card').style.display = 'none';
-    document.getElementById('signup-card').style.display = '';
-  };
-
-  window.togglePass = (id, btn) => {
-    const inp = document.getElementById(id);
-    if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
-    else { inp.type = 'password'; btn.textContent = '👁'; }
-  };
-
-  function showError(id, msg) {
-    const el = document.getElementById(id);
-    el.textContent = msg; el.classList.add('show');
-  }
-  function clearError(id) {
-    const el = document.getElementById(id);
-    el.classList.remove('show');
-  }
-
-  // ── AUTH ──
-  window.doLogin = async () => {
-    clearError('login-error');
-    const phone = document.getElementById('login-phone').value.trim();
-    const pass = document.getElementById('login-pass').value;
-    if (!phone || !pass) return showError('login-error', 'Please fill all fields.');
-    const key = phoneKey(phone);
-    const snap = await getDoc(doc(db, 'users', key));
-    if (!snap.exists()) return showError('login-error', 'Phone number not found. Create an account.');
-    const data = snap.data();
-    if (data.password !== hashPass(pass)) return showError('login-error', 'Incorrect password.');
-    currentUser = { phone, key };
-    saveSession(currentUser);
-    enterChat();
-  };
-
-  window.doSignup = async () => {
-    clearError('signup-error');
-    const phone = document.getElementById('signup-phone').value.trim();
-    const pass = document.getElementById('signup-pass').value;
-    const pass2 = document.getElementById('signup-pass2').value;
-    if (!phone || !pass || !pass2) return showError('signup-error', 'Please fill all fields.');
-    if (pass !== pass2) return showError('signup-error', 'Passwords do not match.');
-    if (pass.length < 6) return showError('signup-error', 'Password must be at least 6 characters.');
-    const key = phoneKey(phone);
-    const snap = await getDoc(doc(db, 'users', key));
-    if (snap.exists()) return showError('signup-error', 'Phone number already registered. Please login.');
-    await setDoc(doc(db, 'users', key), {
-      phone, password: hashPass(pass), createdAt: serverTimestamp()
-    });
-    currentUser = { phone, key };
-    saveSession(currentUser);
-    enterChat();
-  };
-
-  window.doLogout = () => {
-    if (unsubMessages) unsubMessages();
-    clearSession();
-    currentUser = null;
-    document.getElementById('chat-screen').style.display = 'none';
-    document.getElementById('auth-screen').style.display = 'flex';
-    document.getElementById('messages-area').innerHTML =
-      '<div class="empty-chat" id="empty-chat"><div class="icon">💬</div><p>No messages yet.<br>Say hello below!</p></div>';
-  };
-
-  // ── CHAT ──
-  function enterChat() {
-    document.getElementById('auth-screen').style.display = 'none';
-    document.getElementById('chat-screen').style.display = 'flex';
-    document.getElementById('user-phone-display').textContent = currentUser.phone;
-    listenMessages();
-  }
-
-  function listenMessages() {
-    if (unsubMessages) unsubMessages();
-    const q = query(
-      collection(db, 'chats', currentUser.key, 'messages'),
-      orderBy('timestamp', 'asc')
-    );
-    unsubMessages = onSnapshot(q, (snap) => {
-      renderMessages(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    });
-  }
-
-  let lastDay = '';
-  function renderMessages(msgs) {
-    const area = document.getElementById('messages-area');
-    const wasAtBottom = area.scrollHeight - area.scrollTop - area.clientHeight < 80;
-    area.innerHTML = '';
-    lastDay = '';
-    if (msgs.length === 0) {
-      area.innerHTML = '<div class="empty-chat"><div class="icon">💬</div><p>No messages yet.<br>Say hello below!</p></div>';
-      return;
-    }
-    msgs.forEach(msg => {
-      // Day divider
-      const day = formatDay(msg.timestamp);
-      if (day !== lastDay) {
-        const div = document.createElement('div');
-        div.className = 'day-divider';
-        div.innerHTML = `<span>${day}</span>`;
-        area.appendChild(div);
-        lastDay = day;
-      }
-      // Unsent by admin = totally hidden
-      if (msg.unsentByAdmin) return;
-      // Unsent by user = blank bubble (invisible to user too)
-      if (msg.unsentByUser) return;
-
-      const wrap = document.createElement('div');
-      wrap.className = `msg-bubble ${msg.sender === 'user' ? 'sent' : 'received'}`;
-      wrap.innerHTML = `
-        <div>
-          <div class="bubble">${escapeHtml(msg.text)}</div>
-          <div class="msg-time">${formatTime(msg.timestamp)}</div>
-        </div>`;
-      area.appendChild(wrap);
-    });
-    if (wasAtBottom) area.scrollTop = area.scrollHeight;
-  }
-
-  window.sendMessage = async () => {
-    const input = document.getElementById('msg-input');
-    const text = input.value.trim();
-    if (!text || !currentUser) return;
-    input.value = '';
-    autoResize(input);
-    await addDoc(collection(db, 'chats', currentUser.key, 'messages'), {
-      text, sender: 'user',
-      timestamp: serverTimestamp(),
-      unsentByUser: false, unsentByAdmin: false
-    });
-    // Mark user as having new message for admin
-    await setDoc(doc(db, 'users', currentUser.key), {
-      lastMessage: text,
-      lastMessageTime: serverTimestamp(),
-      hasUnread: true,
-      phone: currentUser.phone
-    }, { merge: true });
-  };
-
-  window.handleKey = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  };
-
-  window.autoResize = (el) => {
-    el.style.height = 'auto';
-    el.style.height = Math.min(el.scrollHeight, 100) + 'px';
-  };
-
-  function escapeHtml(t) {
-    return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-            .replace(/"/g,'&quot;').replace(/\n/g,'<br>');
-  }
-
-  // ── INIT ──
-  window.addEventListener('load', () => {
-    document.getElementById('loading').style.display = 'none';
-    const saved = loadSession();
-    if (saved) {
-      currentUser = saved;
-      document.getElementById('auth-screen').style.display = 'none';
-      enterChat();
-    } else {
-      document.getElementById('auth-screen').style.display = 'flex';
-    }
+window.loadMessages = function(phone){
+  const {collection,query,orderBy,onSnapshot}=window.fbModules;
+  const db=window.db;
+  const chatRef=collection(db,'chats',phone,'messages');
+  const q=query(chatRef,orderBy('timestamp','asc'));
+  document.getElementById('msgLoading').style.display='block';
+  if(window.unsubMessages) window.unsubMessages();
+  window.unsubMessages=onSnapshot(q,(snap)=>{
+    document.getElementById('msgLoading').style.display='none';
+    renderMessages(snap.docs.map(d=>({id:d.id,...d.data()})));
   });
+};
+
+window.renderMessages = function(msgs){
+  const area=document.getElementById('messagesArea');
+  let lastDate='';
+  area.innerHTML='';
+  if(msgs.length===0){
+    area.innerHTML='<div class="loading">No messages yet. Say hello! 👋</div>';
+    return;
+  }
+  msgs.forEach(m=>{
+    const ts=m.timestamp?.toDate?m.timestamp.toDate():new Date(m.timestamp||Date.now());
+    const dateStr=ts.toLocaleDateString('en-KE',{day:'numeric',month:'short',year:'numeric'});
+    if(dateStr!==lastDate){
+      lastDate=dateStr;
+      area.innerHTML+=`<div class="date-divider"><span>${dateStr}</span></div>`;
+    }
+    const isSent=m.sender==='user';
+    const timeStr=ts.toLocaleTimeString('en-KE',{hour:'2-digit',minute:'2-digit'});
+    if(m.unsent&&!isSent){ return; }
+    const unsentClass=m.unsent?'unsent':'';
+    const displayText=m.unsent?'🚫 Message unsent':escHtml(m.text||'');
+    area.innerHTML+=`
+      <div class="msg-row ${isSent?'sent':'received'}">
+        <div class="msg-bubble ${unsentClass}" data-id="${m.id}">
+          ${displayText}
+          <span class="msg-time">${timeStr}${isSent?'<span class="msg-tick"> ✓✓</span>':''}</span>
+        </div>
+      </div>`;
+  });
+  area.scrollTop=area.scrollHeight;
+};
+
+window.sendMessage = async function(){
+  const input=document.getElementById('msgInput');
+  const text=input.value.trim();
+  if(!text||!window.currentUser) return;
+  input.value='';
+  input.style.height='auto';
+  const {collection,addDoc,serverTimestamp,doc,setDoc}=window.fbModules;
+  const db=window.db;
+  try{
+    await addDoc(collection(db,'chats',window.currentUser.phone,'messages'),{
+      text,sender:'user',timestamp:serverTimestamp(),unsent:false
+    });
+    await setDoc(doc(db,'users',window.currentUser.phone),{lastMessage:text,lastTime:serverTimestamp(),hasNew:true},{merge:true});
+  }catch(e){showToast('Send failed: '+e.message);}
+};
+</script>
+
+<script>
+function showScreen(id){
+  ['landingScreen','loginScreen','signupScreen','chatScreen'].forEach(s=>{
+    const el=document.getElementById(s);
+    if(!el) return;
+    if(s===id){ el.classList.remove('hidden'); el.style.display='flex'; }
+    else { el.classList.add('hidden'); el.style.display='none'; }
+  });
+}
+function toggleEye(inputId,btn){
+  const inp=document.getElementById(inputId);
+  if(inp.type==='password'){inp.type='text';btn.textContent='🙈';}
+  else{inp.type='password';btn.textContent='👁️';}
+}
+function autoResize(el){
+  el.style.height='auto';
+  el.style.height=Math.min(el.scrollHeight,120)+'px';
+}
+function handleKey(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}
+}
+function escHtml(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
+function showToast(msg){
+  const t=document.getElementById('toastEl');
+  t.textContent=msg;t.classList.remove('hidden');
+  setTimeout(()=>t.classList.add('hidden'),3000);
+}
 </script>
 </body>
-      </html>
+</html>
