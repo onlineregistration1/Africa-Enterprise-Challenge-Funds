@@ -23,42 +23,23 @@ let unsub = null;
 
 if(phone){ enterChat(phone); } else { showAuth(); }
 
-function showAuth(){
-  $('authScreen').classList.remove('hidden');
-  $('chatScreen').classList.add('hidden');
-}
+function showAuth(){ $('authScreen').classList.remove('hidden'); $('chatScreen').classList.add('hidden'); }
 
 $('authBtn').onclick = async ()=>{
-  const ph = $('phone').value.trim();
-  const pw = $('pwd').value;
-  const rep = $('repPwd').value;
+  const ph = $('phone').value.trim(); const pw = $('pwd').value; const rep = $('repPwd').value;
   $('authMsg').textContent='';
   if(!ph ||!pw) return $('authMsg').textContent='Fill all fields';
-  const email = ph+'@aef.chat';
-  const uRef = doc(db,'users',ph);
-  const snap = await getDoc(uRef);
-
+  const email = ph+'@aef.chat'; const uRef = doc(db,'users',ph); const snap = await getDoc(uRef);
   try{
-    if(snap.exists()){
-      $('repWrap').classList.add('hidden');
-      await signInWithEmailAndPassword(auth, email, pw);
-    }else{
-      if(pw!==rep) return $('authMsg').textContent='Passwords do not match';
-      await createUserWithEmailAndPassword(auth, email, pw);
-      await setDoc(uRef,{createdAt:serverTimestamp(),lastSeen:serverTimestamp(),lastSender:'none'});
-    }
-    localStorage.setItem('phone',ph);
-    enterChat(ph);
+    if(snap.exists()){ $('repWrap').classList.add('hidden'); await signInWithEmailAndPassword(auth, email, pw); }
+    else{ if(pw!==rep) return $('authMsg').textContent='Passwords do not match'; await createUserWithEmailAndPassword(auth, email, pw); await setDoc(uRef,{createdAt:serverTimestamp(),lastSeen:serverTimestamp(),lastSender:'none'}); }
+    localStorage.setItem('phone',ph); enterChat(ph);
   }catch(e){ $('authMsg').textContent=e.message; }
 }
 
 function enterChat(ph){
-  phone=ph;
-  $('authScreen').classList.add('hidden');
-  $('chatScreen').classList.remove('hidden');
-  $('chatHead').textContent = ph; // Point 1: Phone top left
-  listen(ph);
-  setTimeout(()=>$('msgInput').focus(),300);
+  phone=ph; $('authScreen').classList.add('hidden'); $('chatScreen').classList.remove('hidden');
+  $('chatHead').textContent = ph; listen(ph); setTimeout(()=>$('msgInput').focus(),300);
 }
 
 function listen(ph){
@@ -67,13 +48,10 @@ function listen(ph){
   unsub = onSnapshot(q, snap=>{
     const box=$('chatBox'); box.innerHTML='';
     snap.forEach(d=>{
-      const m=d.data();
-      if(m.delUser) return;
-      const div=document.createElement('div');
-      div.className='msg '+(m.sender==='user'?'sent':'recv');
+      const m=d.data(); if(m.delUser) return;
+      const div=document.createElement('div'); div.className='msg '+(m.sender==='user'?'sent':'recv');
       if(m.img){ const img=document.createElement('img'); img.src=m.img; div.appendChild(img); }
-      else{ div.textContent=m.text; }
-      box.appendChild(div);
+      else{ div.textContent=m.text; } box.appendChild(div);
     });
   });
 }
@@ -84,26 +62,15 @@ async function sendMsg(text='',imgUrl=''){
 }
 
 $('sendBtn').onclick = async ()=>{
-  const txt=$('msgInput').value.trim();
-  if(!txt) return;
-  await sendMsg(txt,'');
-  $('msgInput').value=''; $('previewBar').classList.remove('show');
-  $('msgInput').focus(); // Point 5: Keyboard stays
+  const txt=$('msgInput').value.trim(); if(!txt) return;
+  await sendMsg(txt,''); $('msgInput').value=''; $('msgInput').focus();
 }
 
 $('imgInput').onchange = async (e)=>{
   const file=e.target.files[0]; if(!file) return;
   const storageRef=ref(storage,`chats/${phone}/${Date.now()}_${file.name}`);
-  const snap=await uploadBytes(storageRef,file);
-  const url=await getDownloadURL(snap.ref);
-  await sendMsg('',url);
-  e.target.value=''; $('msgInput').focus();
-}
-
-$('msgInput').oninput=()=>{ // Point 6: Big previewer
-  const p=$('previewBar');
-  if($('msgInput').value){p.textContent=$('msgInput').value;p.classList.add('show');}
-  else p.classList.remove('show');
+  const snap=await uploadBytes(storageRef,file); const url=await getDownloadURL(snap.ref);
+  await sendMsg('',url); e.target.value=''; $('msgInput').focus();
 }
 
 $('logoutBtn').onclick=async()=>{ await signOut(auth); localStorage.clear(); location.reload(); }
