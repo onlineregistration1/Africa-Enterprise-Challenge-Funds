@@ -1,7 +1,7 @@
 :root{
   --bg:#0b141a; --panel:#111b21; --sent:#005c4b; --recv:#202c33;
   --txt:#e9edef; --green:#00a884; --red:#e53935;
-  --h:56px; --i:130px; /* 130px = Big preview + input. Fits 3/4 screen */
+  --h:56px; --i:60px; /* 60px = 1 single input row only */
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{margin:0;height:100%;background:var(--bg);font-family:system-ui,Arial;color:var(--txt);overflow:hidden;font-size:clamp(15px,4.2vw,18px);}
@@ -23,18 +23,14 @@ header{position:absolute;top:0;left:0;right:0;height:var(--h);display:flex;align
 
 #chatBox{position:absolute;top:var(--h);bottom:var(--i);left:0;right:0;overflow-y:auto;display:flex;flex-direction:column-reverse;gap:6px;padding:8px 6px;}
 .msg{max-width:78%;padding:8px 12px;border-radius:12px;line-height:1.35;word-wrap:break-word;position:relative;user-select:none;}
-.msg img{max-width:100%;border-radius:8px;margin-top:4px;}
 .sent{background:var(--sent);align-self:flex-end;border-bottom-right-radius:2px;margin-left:auto;color:#fff;}
 .recv{background:var(--recv);align-self:flex-start;border-bottom-left-radius:2px;margin-right:auto;color:#fff;}
 .deleted{opacity:.6;font-style:italic;}
 
-#inputWrap{position:absolute;bottom:0;left:0;right:0;height:var(--i);padding:6px 8px;background:var(--panel);border-top:1px solid #2a3942;z-index:10;display:flex;flex-direction:column;gap:6px;}
-#previewBar{min-height:70px;max-height:90px;overflow:auto;background:#1f2c33;border-radius:8px;padding:8px 10px;display:none;white-space:pre-wrap;font-size:16px;}
-#previewBar.show{display:block;}
+#inputWrap{position:absolute;bottom:0;left:0;right:0;height:var(--i);padding:6px 8px;background:var(--panel);border-top:1px solid #2a3942;z-index:10;}
 .row{display:flex;gap:6px;align-items:center;}
 .row input{flex:1;}
 .attachBtn{background:#2a3942;color:var(--txt);padding:12px 14px;border-radius:8px;font-size:22px;font-weight:700;cursor:pointer;user-select:none;}
-.waRow{display:flex;justify-content:center;}
 
 #userList{position:absolute;top:var(--h);bottom:0;left:0;right:0;overflow-y:auto;padding:8px;}
 .userRow{padding:14px;background:#2a3942;border-radius:8px;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
